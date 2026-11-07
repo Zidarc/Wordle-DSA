@@ -49,3 +49,4 @@ endfunction()
 
 # Registered tests
 add_dsa_test(test_safe_array)
+add_dsa_test(test_linked_lists)
