@@ -48,3 +48,4 @@ function(add_dsa_test name)
 endfunction()
 
 # Registered tests
+add_dsa_test(test_safe_array)
