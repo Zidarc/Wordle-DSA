@@ -494,8 +494,9 @@ Wordle-DSA/
 │   │   └── Server.cpp
 │   │
 │   └── third_party/
-│       ├── httplib.h               # cpp-httplib (single header)
-│       └── json.hpp                # nlohmann/json (single header)
+│       ├── README.md               # Versions and licenses of the two headers
+│       ├── httplib.h               # cpp-httplib 0.18.1 (single header)
+│       └── json.hpp                # nlohmann/json 3.11.3 (single header)
 │
 ├── frontend/                       # React + Vite (JavaScript)
 │   ├── index.html
@@ -525,6 +526,7 @@ Wordle-DSA/
 │   └── scores.txt                  # Created at runtime, not committed
 │
 ├── tests/
+│   ├── TestFramework.h             # Tiny header-only test helper (no external library)
 │   ├── test_safe_array.cpp
 │   ├── test_linked_lists.cpp
 │   ├── test_stack_queue.cpp
@@ -548,7 +550,8 @@ Wordle-DSA/
 │   └── COMPLEXITY_ANALYSIS.md
 │
 ├── Resources/
-│   └── Wordle_Project_Proposal-1.pdf
+│   ├── Wordle_Project_Proposal.docx  # Current proposal (web frontend, extended DSA)
+│   └── Wordle_Project_Proposal-1.pdf # Original proposal (Raylib version)
 │
 ├── .gitignore
 ├── CMakeLists.txt
