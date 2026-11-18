@@ -31,6 +31,9 @@ target_include_directories(wordle_ds INTERFACE ${CMAKE_SOURCE_DIR}/backend/inclu
 add_library(wordle_core STATIC
     backend/src/Dictionary.cpp
     backend/src/WordPicker.cpp
+    backend/src/Board.cpp
+    backend/src/LetterTracker.cpp
+    backend/src/Wordle.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
 
@@ -70,3 +73,5 @@ add_dsa_test(test_sort)
 add_dsa_test(test_kmp)
 add_dsa_test(test_shuffle)
 add_dsa_test(test_dictionary)
+add_dsa_test(test_board_tracker)
+add_dsa_test(test_wordle)
