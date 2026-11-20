@@ -22,7 +22,10 @@ endif()
 # Data structures and algorithms (header-only templates)
 # ---------------------------------------------------------------------------
 add_library(wordle_ds INTERFACE)
-target_include_directories(wordle_ds INTERFACE ${CMAKE_SOURCE_DIR}/backend/include)
+target_include_directories(wordle_ds INTERFACE 
+    ${CMAKE_SOURCE_DIR}/backend/include
+    ${CMAKE_SOURCE_DIR}/backend/third_party
+)
 
 # ---------------------------------------------------------------------------
 # Game classes (.h in backend/include, .cpp in backend/src)
@@ -34,8 +37,15 @@ add_library(wordle_core STATIC
     backend/src/Board.cpp
     backend/src/LetterTracker.cpp
     backend/src/Wordle.cpp
+    backend/src/Score.cpp
+    backend/src/GameSession.cpp
+    backend/src/Leaderboard.cpp
+    backend/src/Server.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
+if(WIN32)
+    target_link_libraries(wordle_core PUBLIC ws2_32)
+endif()
 
 # ---------------------------------------------------------------------------
 # Server executable
@@ -44,6 +54,9 @@ add_executable(wordle_server
     backend/src/main.cpp
 )
 target_link_libraries(wordle_server PRIVATE wordle_core)
+if(WIN32)
+    target_link_libraries(wordle_server PRIVATE ws2_32)
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests (CTest)
@@ -75,3 +88,6 @@ add_dsa_test(test_shuffle)
 add_dsa_test(test_dictionary)
 add_dsa_test(test_board_tracker)
 add_dsa_test(test_wordle)
+add_dsa_test(test_score)
+add_dsa_test(test_game_session)
+add_dsa_test(test_leaderboard)

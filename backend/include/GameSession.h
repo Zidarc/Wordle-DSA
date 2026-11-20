@@ -1,0 +1,113 @@
+#ifndef WORDLE_DSA_GAME_SESSION_H
+#define WORDLE_DSA_GAME_SESSION_H
+
+// One game session: coordinates Board (2D array), LetterTracker (array of 26 + jagged rows),
+// Wordle (secret word BST + 2-pass feedback), Stack (guess history),
+// Queue (shuffled hint positions), and DoublyLinkedList (game replay).
+
+#include "Board.h"
+#include "Dictionary.h"
+#include "Difficulty.h"
+#include "LetterTracker.h"
+#include "Score.h"
+#include "Wordle.h"
+#include "ds/DoublyLinkedList.h"
+#include "ds/Queue.h"
+#include "ds/SafeArray.h"
+#include "ds/Stack.h"
+
+#include <string>
+
+enum class GameStatus
+{
+    Playing = 0,
+    Won = 1,
+    Lost = 2
+};
+
+inline const char* toString(GameStatus status)
+{
+    switch (status)
+    {
+    case GameStatus::Won:
+        return "won";
+    case GameStatus::Lost:
+        return "lost";
+    case GameStatus::Playing:
+    default:
+        return "playing";
+    }
+}
+
+inline std::ostream& operator<<(std::ostream& os, GameStatus s)
+{
+    return os << toString(s);
+}
+
+struct HintResult
+{
+    bool available = false;
+    int position = -1; // 0..4
+    char letter = '\0';
+    int hintsUsed = 0;
+    int penalty = 0;
+    std::string message;
+};
+
+struct GuessResult
+{
+    bool accepted = false;
+    std::string errorMessage;
+    GuessFeedback feedback;
+    LookupStats lookupStats;
+    int attemptsLeft = 0;
+    int attemptsUsed = 0;
+    GameStatus status = GameStatus::Playing;
+    int score = 0;
+};
+
+class GameSession
+{
+public:
+    GameSession();
+    GameSession(const std::string& id, const std::string& secretWord,
+                Difficulty difficulty = Difficulty::Normal, unsigned int hintSeed = 0);
+
+    const std::string& id() const { return id_; }
+    Difficulty difficulty() const { return difficulty_; }
+    GameStatus status() const { return status_; }
+    bool isGameOver() const { return status_ != GameStatus::Playing; }
+    int maxAttempts() const { return maxAttempts_; }
+    int attemptsUsed() const { return board_.filledRows(); }
+    int attemptsLeft() const { return maxAttempts_ - board_.filledRows(); }
+    int hintsUsed() const { return hintsUsed_; }
+    int score() const { return score_; }
+    const std::string& secretWord() const { return wordle_.secret(); }
+
+    const Board& board() const { return board_; }
+    const LetterTracker& tracker() const { return tracker_; }
+    const Stack<std::string>& history() const { return history_; }
+    const DoublyLinkedList<GuessFeedback>& replay() const { return replay_; }
+
+    GuessResult makeGuess(const std::string& rawGuess, const Dictionary& dictionary);
+    HintResult useHint();
+
+private:
+    std::string id_;
+    Difficulty difficulty_;
+    int maxAttempts_;
+    Wordle wordle_;
+    Board board_;
+    LetterTracker tracker_;
+    Stack<std::string> history_;
+    Queue<int> hintQueue_;
+    DoublyLinkedList<GuessFeedback> replay_;
+    int hintsUsed_;
+    bool hintRevealed_[5];
+    GameStatus status_;
+    int score_;
+
+    void initHintQueue(unsigned int seed);
+};
+
+#endif // WORDLE_DSA_GAME_SESSION_H
