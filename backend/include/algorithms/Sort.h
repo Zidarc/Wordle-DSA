@@ -105,17 +105,23 @@ void combSort(Arr& a, int n, SortCounter* counter = nullptr)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Insertion sort: O(n^2) worst case, O(n) on sorted input. Each shift of an
+// element one place to the right is counted as a swap.
+// ---------------------------------------------------------------------------
 template <typename Arr>
-void insertionSort(Arr& a, int n)
+void insertionSort(Arr& a, int n, SortCounter* counter = nullptr)
 {
     typedef typename std::decay<decltype(a[0])>::type T;
     for (int i = 1; i < n; i++)
     {
         T value = a[i];
         int j = i - 1;
-        while (j >= 0 && value < a[j])
+        while (j >= 0 && sortLess(value, a[j], counter))
         {
             a[j + 1] = a[j];
+            if (counter)
+                counter->swaps++;
             j--;
         }
         a[j + 1] = value;
@@ -123,7 +129,7 @@ void insertionSort(Arr& a, int n)
 }
 
 template <typename Arr, typename T>
-void mergeRange(Arr& a, T* temp, int low, int mid, int high)
+void mergeRange(Arr& a, T* temp, int low, int mid, int high, SortCounter* counter = nullptr)
 {
     int i = low;
     int j = mid + 1;
@@ -131,7 +137,7 @@ void mergeRange(Arr& a, T* temp, int low, int mid, int high)
 
     while (i <= mid && j <= high)
     {
-        if (a[j] < a[i])
+        if (sortLess(a[j], a[i], counter))
             temp[k++] = a[j++];
         else
             temp[k++] = a[i++];
@@ -143,29 +149,31 @@ void mergeRange(Arr& a, T* temp, int low, int mid, int high)
 
     for (k = low; k <= high; k++)
         a[k] = temp[k];
+    if (counter)
+        counter->swaps += high - low + 1; // elements copied back
 }
 
 template <typename Arr, typename T>
-void mergeSortRange(Arr& a, T* temp, int low, int high)
+void mergeSortRange(Arr& a, T* temp, int low, int high, SortCounter* counter = nullptr)
 {
     if (low >= high)
         return;
 
     int mid = low + (high - low) / 2;
-    mergeSortRange(a, temp, low, mid);
-    mergeSortRange(a, temp, mid + 1, high);
-    mergeRange(a, temp, low, mid, high);
+    mergeSortRange(a, temp, low, mid, counter);
+    mergeSortRange(a, temp, mid + 1, high, counter);
+    mergeRange(a, temp, low, mid, high, counter);
 }
 
 template <typename Arr>
-void mergeSort(Arr& a, int n)
+void mergeSort(Arr& a, int n, SortCounter* counter = nullptr)
 {
     if (n < 2)
         return;
 
     typedef typename std::decay<decltype(a[0])>::type T;
     T* temp = new T[n];
-    mergeSortRange(a, temp, 0, n - 1);
+    mergeSortRange(a, temp, 0, n - 1, counter);
     delete[] temp;
 }
 
@@ -178,8 +186,10 @@ inline int sortLetterIndex(char c)
     return 0;
 }
 
+// LSD radix sort makes no comparisons at all; every placement of a word into
+// the output array is counted as a move (swaps).
 template <typename Arr>
-void radixSortWords(Arr& a, int n, int length = 5)
+void radixSortWords(Arr& a, int n, int length = 5, SortCounter* counter = nullptr)
 {
     if (n < 2)
         return;
@@ -202,6 +212,8 @@ void radixSortWords(Arr& a, int n, int length = 5)
             temp[count[d]] = a[i];
             count[d]++;
         }
+        if (counter)
+            counter->swaps += n;
 
         for (int i = 0; i < n; i++)
             a[i] = temp[i];
