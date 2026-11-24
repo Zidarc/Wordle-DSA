@@ -153,9 +153,15 @@ Every structure below is **implemented by the team**. None is replaced by an STL
 | **Doubly linked list** | `DoublyLinkedList<T>` | Game replay: step forward and backward through the guesses |
 | **Circular linked list** | `CircularLinkedList<T>` | Secret-word rotation: shuffled words in a cycle, so no word repeats until all have been used |
 | **Stack** (linked-list based) | `Stack<T>` | Guess history (most recent on top), and the iterative tree traversal |
+| **Stack** (array based) | `ArrayStack<T>` | Explicit stack for iterative quick sort and iterative backtracking (second implementation strategy) |
 | **Queue** (linked-list based) | `Queue<T>` | Hint order: unrevealed letter positions are shuffled into a queue at game start, and each hint dequeues the next one |
+| **Circular queue** (array based) | `ArrayQueue<T>` | Last 10 finished games, as a bounded ring buffer that drops the oldest game when full |
 | **Binary Search Tree** | `BST<T>` | The secret word's letters: O(log n) "is this letter in the word?" |
 | **AVL tree** | `AVLTree<T>` | The dictionary: self-balancing tree with rotations, used for word validation |
+| **B-tree of order 3 (2-3 tree)** | `BTree<T, 3>` | The dictionary again, as the sixth lookup method: 1-2 words per node, all leaves on one level |
+| **Binary tree properties** | `BinaryTreeProperties.h` | Node / leaf counts and full, complete and perfect checks on the BST and AVL tree |
+| **Dynamic 2D array** (5 × 26) | `FrequencyTable` | How often each letter appears at each position among the possible words; ranks suggestions |
+| **Singly linked list** (candidates) | `Solver` | The words still possible after each guess; impossible words are unlinked in one pass |
 | **Hash table** (separate chaining) | `HashTable<K, V>` | The dictionary (O(1) average validation), and active games on the server keyed by `gameId` |
 | **Min-heap** (priority queue) | `MinHeap<T>` | Top-K leaderboard: streams all saved scores and keeps the best 10 |
 
@@ -168,15 +174,20 @@ Every structure below is **implemented by the team**. None is replaced by an STL
 | **Interpolation search** | Dictionary lookup. Each 5-letter word is mapped to a base-26 number, so the sorted words have numeric keys to interpolate on. |
 | **Radix sort** (LSD) | Sorts the dictionary on load. Every word has exactly 5 letters from a 26-letter alphabet, which makes radix sort a perfect fit: O(5 × (n + 26)). |
 | **Merge sort** | Sorts the top-K leaderboard entries extracted from the heap (stable, so equal scores keep their original order) |
+| **Quick sort** (median-of-three; recursive and explicit-stack) | Ranks the solver's suggestions; also in the Sorting Lab |
+| **Bubble, selection, comb sort** | Sorting Lab, with comparison and swap counters |
+| **Linear / binary search on a linked list** | Searching the solver's candidate list (binary search finds each middle with slow / fast pointers) |
+| **Backtracking** | Solver: builds words letter by letter and prunes any prefix that breaks the feedback or starts no dictionary word |
+| **Types of recursion** | Tail, head, tree, indirect and nested recursion examples in `Recursion.h` |
 | **Insertion sort** | Inserts one new score into the already-sorted list shown after a game |
 | **Fisher–Yates shuffle** | Shuffles the secret words and the hint positions |
 | **Polynomial rolling hash** | Hash function for the hash table, with **rehashing** when the load factor exceeds 0.75 |
-| **Recursion** | Binary search, BST and AVL insert/search/destroy, merge sort |
-| **Simulation of recursion** | Iterative in-order traversal of the AVL tree using our own stack, used to check that the tree is sorted |
+| **Recursion** | Binary search, BST and AVL insert/search/destroy, B-tree insert, merge sort, quick sort, backtracking |
+| **Simulation of recursion** | Iterative in-order traversal of the AVL tree, iterative quick sort and iterative backtracking, each with our own stack |
 | **KMP string search** | Searching the leaderboard by part of a player's name |
 | **Two-pass guess evaluation** | Correct green / yellow / gray colouring with repeated letters |
 
-### Five ways to validate one word
+### Six ways to validate one word
 
 The same guess is checked by every method, and the comparison counts are sent to the DSA Insights panel:
 
@@ -187,12 +198,15 @@ Guess "CRANE"
      ├──► Binary search ─────────── O(log n)   e.g.  11 comparisons
      ├──► Interpolation search ──── O(log log n) average, e.g. 4 comparisons
      ├──► AVL tree ──────────────── O(log n)   e.g.  12 comparisons
+     ├──► 2-3 tree (B-tree) ─────── O(log n)   e.g.  15 comparisons, 9 nodes read
      └──► Hash table ────────────── O(1) avg   e.g.   1 comparison
 ```
 
 (The numbers are illustrative. The real ones depend on the word list.)
 
-The **hash table** is the method the game actually relies on. The other four are run alongside it for the comparison.
+The **hash table** is the method the game actually relies on. The other five are run alongside it for the comparison.
+
+The dictionary is inserted into the 2-3 tree in sorted order, and bottom-up splits then leave most nodes holding one word, so on this word list the 2-3 tree is only about one level shorter than the AVL tree. With random insertion order, or a higher order (`BTree<T, 5>`), the difference grows; `test_btree` checks this.
 
 ### Secret word BST
 
