@@ -420,9 +420,140 @@ void Server::setupRoutes()
             {"hashUsedBuckets", s.hashUsedBuckets},
             {"hashLongestChain", s.hashLongestChain},
             {"hashRehashCount", s.hashRehashCount},
-            {"hashLoadFactor", s.hashLoadFactor}
+            {"hashLoadFactor", s.hashLoadFactor},
+            {"avlLeaves", s.avlLeaves},
+            {"avlBalanced", s.avlBalanced},
+            {"btreeHeight", s.btreeHeight},
+            {"btreeNodes", s.btreeNodes}
         };
 
+        res.status = 200;
+        res.set_content(reply.dump(), "application/json");
+    });
+
+    setupDsaRoutes();
+}
+
+void Server::setupDsaRoutes()
+{
+    // GET /api/game/solver?gameId=...&count=5
+    // Possible words, backtracking statistics (recursive and explicit-stack)
+    // and the top suggestions ranked with quick sort.
+    http_->Get("/api/game/solver", [this](const httplib::Request& req, httplib::Response& res) {
+        setCors(res);
+        std::string gameId = req.get_param_value("gameId");
+        GameSession* session = sessions_.find(gameId);
+        if (!session)
+        {
+            res.status = 404;
+            res.set_content(json{{"error", "Game session not found"}}.dump(), "application/json");
+            return;
+        }
+
+        std::size_t count = 5;
+        if (req.has_param("count"))
+        {
+            try
+            {
+                count = static_cast<std::size_t>(std::stoul(req.get_param_value("count")));
+            }
+            catch (...)
+            {
+            }
+        }
+
+        Solver solver(dictionary_);
+        replayInto(solver, *session);
+
+        BacktrackStats rec;
+        BacktrackStats iter;
+        solver.generateCandidates(&rec);
+        solver.generateCandidatesIterative(&iter);
+
+        auto statsJson = [](const BacktrackStats& b) {
+            return json{{"nodesVisited", b.nodesVisited},
+                        {"pruned", b.pruned},
+                        {"prefixChecks", b.prefixChecks},
+                        {"maxDepth", b.maxDepth},
+                        {"solutions", b.solutions}};
+        };
+
+        json suggestions = json::array();
+        // Suggestions would give the answer away, so only after a few guesses
+        // or once the game is over.
+        if (session->isGameOver() || session->attemptsUsed() >= 2)
+        {
+            SafeArray<RankedWord> top = solver.suggestions(count);
+            for (std::size_t i = 0; i < top.size(); ++i)
+                suggestions.push_back({{"word", top[i].word}, {"score", top[i].score}});
+        }
+
+        json reply = {
+            {"gameId", gameId},
+            {"possibleWords", solver.remaining()},
+            {"backtracking", statsJson(rec)},
+            {"backtrackingIterative", statsJson(iter)},
+            {"suggestions", suggestions}
+        };
+        res.status = 200;
+        res.set_content(reply.dump(), "application/json");
+    });
+
+    // GET /api/dsa/sort?limit=N
+    // Sorting Lab: seven sorts on the same shuffled copy of the dictionary.
+    http_->Get("/api/dsa/sort", [this](const httplib::Request& req, httplib::Response& res) {
+        setCors(res);
+        std::size_t limit = 0;
+        if (req.has_param("limit"))
+        {
+            try
+            {
+                limit = static_cast<std::size_t>(std::stoul(req.get_param_value("limit")));
+            }
+            catch (...)
+            {
+            }
+        }
+
+        SortingLab lab(dictionary_.sortedWords(), 2513, limit);
+        SafeArray<SortRun> runs = lab.runAll();
+        json list = json::array();
+        for (std::size_t i = 0; i < runs.size(); ++i)
+        {
+            list.push_back({{"algorithm", runs[i].algorithm},
+                            {"complexity", runs[i].complexity},
+                            {"comparisons", runs[i].comparisons},
+                            {"swaps", runs[i].swaps},
+                            {"microseconds", runs[i].microseconds},
+                            {"sortedCorrectly", runs[i].sortedCorrectly}});
+        }
+        res.status = 200;
+        res.set_content(json{{"inputSize", lab.inputSize()}, {"runs", list}}.dump(),
+                        "application/json");
+    });
+
+    // GET /api/dsa/trees
+    // Binary tree properties of the dictionary's AVL tree and the B-tree.
+    http_->Get("/api/dsa/trees", [this](const httplib::Request&, httplib::Response& res) {
+        setCors(res);
+        TreeShape avl = dictionary_.avlShape();
+        const BTree<std::string>& bt = dictionary_.btree();
+        json reply = {
+            {"avl", {{"nodes", avl.nodes},
+                     {"leaves", avl.leaves},
+                     {"internalNodes", avl.internalNodes},
+                     {"singleChildNodes", avl.singleChildNodes},
+                     {"height", avl.height},
+                     {"minPossibleHeight", avl.minPossibleHeight},
+                     {"full", avl.full},
+                     {"complete", avl.complete},
+                     {"perfect", avl.perfect}}},
+            {"btree", {{"order", 3},
+                       {"keys", bt.size()},
+                       {"nodes", bt.nodeCount()},
+                       {"height", bt.height()},
+                       {"valid", bt.isValid()}}}
+        };
         res.status = 200;
         res.set_content(reply.dump(), "application/json");
     });

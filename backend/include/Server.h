@@ -49,6 +49,7 @@ private:
     int gameCounter_ = 0;
 
     void setupRoutes();
+    void setupDsaRoutes(); // solver, Sorting Lab and tree routes
     std::string generateGameId();
 };
 
