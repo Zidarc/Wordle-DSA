@@ -20,6 +20,8 @@
 //   destroy / copy ........... O(n)
 //   size / empty ............. O(1)
 
+#include "ds/BinaryTreeProperties.h"
+
 #include <cstddef>
 #include <string>
 
@@ -115,6 +117,14 @@ public:
     {
         return height(root_);
     }
+
+    // ----- binary tree properties (see BinaryTreeProperties.h) -----
+
+    std::size_t leafCount() const { return btCountLeaves(root_); }
+    bool isFull() const { return btIsFull(root_); }
+    bool isComplete() const { return btIsComplete(root_); }
+    bool isPerfect() const { return btIsPerfect(root_); }
+    TreeShape shape() const { return btShape(root_); }
 
 private:
     Node* root_;
