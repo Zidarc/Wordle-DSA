@@ -377,3 +377,57 @@ table.data th.num {
 .stack-list li.top {
   color: var(--accent);
 }
+
+/* ---------- DSA insights ---------- */
+
+table.lookup tr.used td {
+  color: var(--accent);
+}
+
+.used-tag {
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #062026;
+  font-size: 0.7rem;
+}
+
+.bar {
+  height: 3px;
+  margin-top: 3px;
+  border-radius: 2px;
+  background: var(--present);
+  min-width: 2px;
+}
+
+.small {
+  font-size: 0.75rem;
+}
+
+.lab-form {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 6px;
+}
+
+.lab-form input {
+  width: 110px;
+  text-transform: uppercase;
+}
+
+table.stats {
+  margin-top: 12px;
+}
+
+/* ---------- solver ---------- */
+
+.big-number {
+  margin: 4px 0 0;
+  font-size: 2.4rem;
+  color: var(--accent);
+}
+
+.panel h2 + .ds-tag + .big-number + .muted {
+  margin-top: 0;
+}

@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import Board from './components/Board.jsx';
 import DifficultySelect from './components/DifficultySelect.jsx';
+import DsaInsights from './components/DsaInsights.jsx';
 import HintButton from './components/HintButton.jsx';
 import HistoryPanel from './components/HistoryPanel.jsx';
 import Keyboard from './components/Keyboard.jsx';
+import LabPanel from './components/LabPanel.jsx';
+import MethodSelect from './components/MethodSelect.jsx';
 import SidePanel from './components/SidePanel.jsx';
+import SolverPanel from './components/SolverPanel.jsx';
 import useGame from './hooks/useGame.js';
 
 // App layout: top bar (difficulty, new game), the game column on the left,
 // and the DSA side panels on the right.
 // TIP: all game state is in hooks/useGame.js; all fetches in api/client.js.
 export default function App() {
-  const { game, start, addLetter, removeLetter, submit, requestHint } = useGame();
+  const [method, setMethod] = useState('hash');
+  const { game, start, addLetter, removeLetter, submit, requestHint } = useGame(method);
   const [difficulty, setDifficulty] = useState('normal');
   const started = useRef(false);
 
@@ -30,6 +35,7 @@ export default function App() {
           <span>hand-built data structures</span>
         </div>
         <div className="controls">
+          <MethodSelect value={method} onChange={setMethod} />
           <DifficultySelect value={difficulty} onChange={setDifficulty} />
           <button className="btn primary" onClick={() => start(difficulty)}>
             New game
@@ -62,6 +68,21 @@ export default function App() {
         </section>
         <SidePanel
           tabs={[
+            {
+              id: 'insights',
+              label: 'DSA Insights',
+              render: () => <DsaInsights lookup={game.lookup} method={method} version={game.version} />,
+            },
+            {
+              id: 'solver',
+              label: 'Solver',
+              render: () => <SolverPanel gameId={game.gameId} version={game.version} />,
+            },
+            {
+              id: 'lab',
+              label: 'DSA Lab',
+              render: () => <LabPanel version={game.version} />,
+            },
             {
               id: 'history',
               label: 'History',
