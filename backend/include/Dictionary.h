@@ -23,6 +23,33 @@
 #include <istream>
 #include <string>
 
+// The six ways to look a word up. The player picks one in the UI; the game
+// then accepts or rejects guesses using that method's answer.
+// TIP: the switch in Dictionary::lookupWith maps each one to its code.
+enum class LookupMethod
+{
+    Linear = 0,
+    Binary,
+    Interpolation,
+    Avl,
+    BTree,
+    Hash
+};
+
+// Name and Big-O of a method, for the UI.
+struct LookupMethodInfo
+{
+    LookupMethod method;
+    const char* key;       // "linear", "binary", ... (used in the API)
+    const char* name;      // "Linear search", ...
+    const char* timeBest;  // best case
+    const char* timeAvg;   // average case
+    const char* timeWorst; // worst case
+    const char* spaceStructure; // memory the structure itself needs
+    const char* spaceExtra;     // extra memory one lookup needs
+    const char* structure;      // what it searches
+};
+
 // Result of one lookup method: did it find the word, and how many comparisons it took.
 struct LookupResult
 {
@@ -45,6 +72,9 @@ struct LookupStats
 
     // True when all six methods agree (they always should).
     bool allAgree() const;
+
+    // The result of one method.
+    const LookupResult& get(LookupMethod method) const;
 };
 
 // Sizes and shape of the structures, for GET /api/dsa/stats.
@@ -92,6 +122,19 @@ public:
 
     // The check the game relies on: a hash table lookup. Case-insensitive.
     bool isInDictionary(const std::string& word) const;
+
+    static constexpr int kMethodCount = 6;
+
+    // Name and complexity of each method (index = static_cast<int>(method)).
+    static const LookupMethodInfo& methodInfo(LookupMethod method);
+    static const LookupMethodInfo& methodInfo(int index);
+
+    // "linear", "binary", "interpolation", "avl", "btree", "hash" (any case).
+    // Returns false for an unknown name and leaves `method` unchanged.
+    static bool methodFromString(const std::string& name, LookupMethod& method);
+
+    // Checks a word with one chosen method (timed and counted).
+    LookupResult lookupWith(const std::string& word, LookupMethod method) const;
 
     // Runs all six lookup methods on the same word and counts their comparisons.
     LookupStats lookupAll(const std::string& word) const;

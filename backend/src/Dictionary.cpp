@@ -14,6 +14,79 @@ bool LookupStats::allAgree() const
            btree.found == hash.found;
 }
 
+const LookupResult& LookupStats::get(LookupMethod method) const
+{
+    switch (method)
+    {
+    case LookupMethod::Linear:
+        return linear;
+    case LookupMethod::Binary:
+        return binary;
+    case LookupMethod::Interpolation:
+        return interpolation;
+    case LookupMethod::Avl:
+        return avl;
+    case LookupMethod::BTree:
+        return btree;
+    case LookupMethod::Hash:
+    default:
+        return hash;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Lookup methods: names and complexities (n = number of words, m = buckets)
+// ---------------------------------------------------------------------------
+
+namespace
+{
+const LookupMethodInfo kMethods[Dictionary::kMethodCount] = {
+    {LookupMethod::Linear, "linear", "Linear search", "O(1)", "O(n)", "O(n)",
+     "O(n) sorted array", "O(1)", "SafeArray (sorted)"},
+    {LookupMethod::Binary, "binary", "Binary search", "O(1)", "O(log n)", "O(log n)",
+     "O(n) sorted array", "O(log n) recursion stack", "SafeArray (sorted)"},
+    {LookupMethod::Interpolation, "interpolation", "Interpolation search", "O(1)",
+     "O(log log n)", "O(n)", "O(n) sorted array", "O(1)", "SafeArray (sorted, base-26 keys)"},
+    {LookupMethod::Avl, "avl", "AVL tree", "O(1)", "O(log n)", "O(log n)",
+     "O(n) nodes", "O(log n) recursion stack", "AVLTree<string>"},
+    {LookupMethod::BTree, "btree", "2-3 tree (B-tree)", "O(1)", "O(log n)", "O(log n)",
+     "O(n) nodes", "O(1) (iterative)", "BTree<string, 3>"},
+    {LookupMethod::Hash, "hash", "Hash table", "O(1)", "O(1)", "O(n)",
+     "O(n + m) chains + buckets", "O(1)", "HashTable<string, bool> (chaining)"},
+};
+} // namespace
+
+const LookupMethodInfo& Dictionary::methodInfo(int index)
+{
+    if (index < 0 || index >= kMethodCount)
+        throw std::out_of_range("Dictionary::methodInfo: index out of range");
+    return kMethods[index];
+}
+
+const LookupMethodInfo& Dictionary::methodInfo(LookupMethod method)
+{
+    return methodInfo(static_cast<int>(method));
+}
+
+bool Dictionary::methodFromString(const std::string& name, LookupMethod& method)
+{
+    std::string lower = name;
+    for (char& c : lower)
+    {
+        if (c >= 'A' && c <= 'Z')
+            c = static_cast<char>(c - 'A' + 'a');
+    }
+    for (const LookupMethodInfo& info : kMethods)
+    {
+        if (lower == info.key)
+        {
+            method = info.method;
+            return true;
+        }
+    }
+    return false;
+}
+
 // ---------------------------------------------------------------------------
 // Loading
 // ---------------------------------------------------------------------------
@@ -130,6 +203,12 @@ static LookupResult timedLookup(Lookup lookup, int repeats)
     long long total = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
     result.nanoseconds = total / repeats;
     return result;
+}
+
+LookupResult Dictionary::lookupWith(const std::string& word, LookupMethod method) const
+{
+    // All six run anyway for the comparison table; pick the chosen one.
+    return lookupAll(word).get(method);
 }
 
 LookupStats Dictionary::lookupAll(const std::string& word) const
