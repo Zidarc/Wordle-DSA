@@ -101,9 +101,11 @@ HintResult GameSession::useHint()
     return res;
 }
 
-GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary& dictionary)
+GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary& dictionary,
+                                   LookupMethod method)
 {
     GuessResult res;
+    res.methodUsed = method;
     res.attemptsLeft = attemptsLeft();
     res.attemptsUsed = attemptsUsed();
     res.status = status_;
@@ -126,7 +128,9 @@ GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary
 
     res.lookupStats = dictionary.lookupAll(guess);
 
-    if (!dictionary.isInDictionary(guess))
+    // The player's chosen method decides. All six always agree (tested in
+    // test_dictionary), so the choice changes the cost, never the answer.
+    if (!res.lookupStats.get(method).found)
     {
         res.accepted = false;
         res.errorMessage = "Not in word list";

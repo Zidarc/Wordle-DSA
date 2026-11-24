@@ -60,6 +60,7 @@ struct GuessResult
     std::string errorMessage;
     GuessFeedback feedback;
     LookupStats lookupStats;
+    LookupMethod methodUsed = LookupMethod::Hash; // the lookup that decided "in the word list?"
     int attemptsLeft = 0;
     int attemptsUsed = 0;
     GameStatus status = GameStatus::Playing;
@@ -89,7 +90,10 @@ public:
     const Stack<std::string>& history() const { return history_; }
     const DoublyLinkedList<GuessFeedback>& replay() const { return replay_; }
 
-    GuessResult makeGuess(const std::string& rawGuess, const Dictionary& dictionary);
+    // Validates the guess with the chosen lookup method (hash table by
+    // default), then colours it. All six methods still run for the stats.
+    GuessResult makeGuess(const std::string& rawGuess, const Dictionary& dictionary,
+                          LookupMethod method = LookupMethod::Hash);
     HintResult useHint();
 
 private:

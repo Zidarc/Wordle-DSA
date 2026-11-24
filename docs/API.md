@@ -327,3 +327,31 @@ The last 10 finished games, most recent first. Stored in a bounded circular `Arr
   { "gameId": "game-3-118204", "secretWord": "CRANE", "difficulty": "normal", "result": "won", "attempts": 4, "score": 450 }
 ]
 ```
+
+### 13. Choosing the lookup method
+
+`POST /api/game/guess` accepts an optional `"method"`: `linear`, `binary`, `interpolation`, `avl`, `btree` or `hash` (default). That method decides whether the word is in the list. All six still run, and the reply adds:
+
+| Field | Meaning |
+|-------|---------|
+| `methodUsed` | The method that decided |
+| `lookupMethods` | One row per method: `key`, `name`, `structure`, `found`, `comparisons`, `nanoseconds` (average of 200 runs), `timeBest`, `timeAvg`, `timeWorst`, `spaceStructure`, `spaceExtra`, `used` |
+
+### 14. `GET /api/dsa/lookup?word={word}&method={method}`
+Looks any 5-letter word up with all six methods, without a game. Same `methods` rows as above.
+
+#### Response (`200 OK`, shortened)
+```json
+{
+  "word": "ZEBRA",
+  "found": true,
+  "methodUsed": "avl",
+  "wordCount": 701,
+  "timingRepeats": 200,
+  "methods": [
+    { "key": "linear", "comparisons": 701, "nanoseconds": 32344, "timeAvg": "O(n)", "spaceExtra": "O(1)", "used": false },
+    { "key": "avl", "comparisons": 20, "nanoseconds": 734, "timeAvg": "O(log n)", "spaceExtra": "O(log n) recursion stack", "used": true },
+    { "key": "hash", "comparisons": 1, "nanoseconds": 143, "timeAvg": "O(1)", "spaceExtra": "O(1)", "used": false }
+  ]
+}
+```

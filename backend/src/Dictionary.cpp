@@ -3,6 +3,7 @@
 #include "algorithms/Search.h"
 #include "algorithms/Sort.h"
 
+#include <chrono>
 #include <fstream>
 #include <stdexcept>
 
@@ -11,6 +12,79 @@ bool LookupStats::allAgree() const
     return linear.found == binary.found && binary.found == interpolation.found &&
            interpolation.found == avl.found && avl.found == btree.found &&
            btree.found == hash.found;
+}
+
+const LookupResult& LookupStats::get(LookupMethod method) const
+{
+    switch (method)
+    {
+    case LookupMethod::Linear:
+        return linear;
+    case LookupMethod::Binary:
+        return binary;
+    case LookupMethod::Interpolation:
+        return interpolation;
+    case LookupMethod::Avl:
+        return avl;
+    case LookupMethod::BTree:
+        return btree;
+    case LookupMethod::Hash:
+    default:
+        return hash;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Lookup methods: names and complexities (n = number of words, m = buckets)
+// ---------------------------------------------------------------------------
+
+namespace
+{
+const LookupMethodInfo kMethods[Dictionary::kMethodCount] = {
+    {LookupMethod::Linear, "linear", "Linear search", "O(1)", "O(n)", "O(n)",
+     "O(n) sorted array", "O(1)", "SafeArray (sorted)"},
+    {LookupMethod::Binary, "binary", "Binary search", "O(1)", "O(log n)", "O(log n)",
+     "O(n) sorted array", "O(log n) recursion stack", "SafeArray (sorted)"},
+    {LookupMethod::Interpolation, "interpolation", "Interpolation search", "O(1)",
+     "O(log log n)", "O(n)", "O(n) sorted array", "O(1)", "SafeArray (sorted, base-26 keys)"},
+    {LookupMethod::Avl, "avl", "AVL tree", "O(1)", "O(log n)", "O(log n)",
+     "O(n) nodes", "O(log n) recursion stack", "AVLTree<string>"},
+    {LookupMethod::BTree, "btree", "2-3 tree (B-tree)", "O(1)", "O(log n)", "O(log n)",
+     "O(n) nodes", "O(1) (iterative)", "BTree<string, 3>"},
+    {LookupMethod::Hash, "hash", "Hash table", "O(1)", "O(1)", "O(n)",
+     "O(n + m) chains + buckets", "O(1)", "HashTable<string, bool> (chaining)"},
+};
+} // namespace
+
+const LookupMethodInfo& Dictionary::methodInfo(int index)
+{
+    if (index < 0 || index >= kMethodCount)
+        throw std::out_of_range("Dictionary::methodInfo: index out of range");
+    return kMethods[index];
+}
+
+const LookupMethodInfo& Dictionary::methodInfo(LookupMethod method)
+{
+    return methodInfo(static_cast<int>(method));
+}
+
+bool Dictionary::methodFromString(const std::string& name, LookupMethod& method)
+{
+    std::string lower = name;
+    for (char& c : lower)
+    {
+        if (c >= 'A' && c <= 'Z')
+            c = static_cast<char>(c - 'A' + 'a');
+    }
+    for (const LookupMethodInfo& info : kMethods)
+    {
+        if (lower == info.key)
+        {
+            method = info.method;
+            return true;
+        }
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -109,6 +183,34 @@ bool Dictionary::isInDictionary(const std::string& word) const
     return table_.contains(w);
 }
 
+// Runs `lookup` once to record its answer and comparison count, then
+// kTimingRepeats more times to measure the average time of one call.
+// TIP: this is where the "ns" numbers in the DSA Insights panel come from.
+template <typename Lookup>
+static LookupResult timedLookup(Lookup lookup, int repeats)
+{
+    LookupResult result;
+    result.found = lookup(result.comparisons);
+
+    int ignored = 0;
+    volatile bool sink = false; // volatile: the loop cannot be optimised away
+    auto start = std::chrono::steady_clock::now();
+    for (int i = 0; i < repeats; ++i)
+        sink = lookup(ignored);
+    auto end = std::chrono::steady_clock::now();
+    (void)sink;
+
+    long long total = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    result.nanoseconds = total / repeats;
+    return result;
+}
+
+LookupResult Dictionary::lookupWith(const std::string& word, LookupMethod method) const
+{
+    // All six run anyway for the comparison table; pick the chosen one.
+    return lookupAll(word).get(method);
+}
+
 LookupStats Dictionary::lookupAll(const std::string& word) const
 {
     LookupStats stats;
@@ -118,16 +220,22 @@ LookupStats Dictionary::lookupAll(const std::string& word) const
 
     const int n = static_cast<int>(sortedWords_.size());
     const std::string& w = stats.word;
+    const int r = kTimingRepeats;
 
-    stats.linear.found =
-        linearSearch(sortedWords_, n, w, &stats.linear.comparisons) != -1;
-    stats.binary.found =
-        binarySearch(sortedWords_, 0, n - 1, w, &stats.binary.comparisons) != -1;
-    stats.interpolation.found =
-        interpolationSearch(sortedWords_, n, w, &stats.interpolation.comparisons) != -1;
-    stats.avl.found = tree_.contains(w, stats.avl.comparisons);
-    stats.btree.found = btree_.search(w, stats.btree.comparisons, stats.btreeNodesVisited);
-    stats.hash.found = table_.contains(w, stats.hash.comparisons);
+    stats.linear = timedLookup([&](int& c) { return linearSearch(sortedWords_, n, w, &c) != -1; }, r);
+    stats.binary = timedLookup([&](int& c) { return binarySearch(sortedWords_, 0, n - 1, w, &c) != -1; }, r);
+    stats.interpolation =
+        timedLookup([&](int& c) { return interpolationSearch(sortedWords_, n, w, &c) != -1; }, r);
+    stats.avl = timedLookup([&](int& c) { return tree_.contains(w, c); }, r);
+    stats.btree = timedLookup(
+        [&](int& c) {
+            int nodes = 0;
+            bool found = btree_.search(w, c, nodes);
+            stats.btreeNodesVisited = nodes;
+            return found;
+        },
+        r);
+    stats.hash = timedLookup([&](int& c) { return table_.contains(w, c); }, r);
 
     return stats;
 }
