@@ -69,6 +69,27 @@ void Constraints::add(const std::string& guess, const LetterState* feedback)
     ++guesses_;
 }
 
+// GUIDE 2.6: a hint is a green without a guess - fix it, then recount
+void Constraints::addKnownLetter(int pos, char letter)
+{
+    if (pos < 0 || pos >= kLength)
+        throw std::invalid_argument("Constraints::addKnownLetter: position out of range");
+    if (letter < 'A' || letter > 'Z')
+        throw std::invalid_argument("Constraints::addKnownLetter: letter must be upper-case A-Z");
+
+    fixed_[pos] = letter;
+
+    int fixedCopies = 0;
+    for (int p = 0; p < kLength; ++p)
+    {
+        if (fixed_[p] == letter)
+            ++fixedCopies;
+    }
+    int l = letter - 'A';
+    if (fixedCopies > minCount_[l])
+        minCount_[l] = fixedCopies;
+}
+
 bool Constraints::allowsLetterAt(int pos, char letter) const
 {
     int l = letter - 'A';

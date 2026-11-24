@@ -35,6 +35,12 @@ public:
     void add(const std::string& guess, const LetterState* feedback);
     void reset();
 
+    // A revealed hint: `letter` is known to be at `pos` (like a green that
+    // came from no guess). Raises the letter's minimum count to the number
+    // of fixed positions holding it. Throws std::invalid_argument for a bad
+    // position or letter.
+    void addKnownLetter(int pos, char letter);
+
     // Can `letter` go at `pos`, looking at that one position only?
     bool allowsLetterAt(int pos, char letter) const;
 
