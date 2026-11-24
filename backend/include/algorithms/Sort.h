@@ -76,6 +76,35 @@ void selectionSort(Arr& a, int n, SortCounter* counter = nullptr)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Comb sort: bubble sort that first compares elements far apart. The gap
+// starts at n and shrinks by a factor of 1.3 each pass, which moves small
+// values stuck near the end ("turtles") forward quickly. The last passes use
+// gap 1 and are plain bubble sort passes, run until nothing is swapped.
+// ---------------------------------------------------------------------------
+template <typename Arr>
+void combSort(Arr& a, int n, SortCounter* counter = nullptr)
+{
+    int gap = n;
+    bool swapped = true;
+    while (gap > 1 || swapped)
+    {
+        gap = (gap * 10) / 13;
+        if (gap < 1)
+            gap = 1;
+
+        swapped = false;
+        for (int i = 0; i + gap < n; i++)
+        {
+            if (sortLess(a[i + gap], a[i], counter))
+            {
+                sortSwap(a, i, i + gap, counter);
+                swapped = true;
+            }
+        }
+    }
+}
+
 template <typename Arr>
 void insertionSort(Arr& a, int n)
 {
