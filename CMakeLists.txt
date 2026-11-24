@@ -25,13 +25,25 @@ add_library(wordle_ds INTERFACE)
 target_include_directories(wordle_ds INTERFACE ${CMAKE_SOURCE_DIR}/backend/include)
 
 # ---------------------------------------------------------------------------
+# Game classes (.h in backend/include, .cpp in backend/src)
+# New game classes are added to this list as they are written.
+# ---------------------------------------------------------------------------
+add_library(wordle_core STATIC
+    backend/src/Dictionary.cpp
+    backend/src/WordPicker.cpp
+    backend/src/Board.cpp
+    backend/src/LetterTracker.cpp
+    backend/src/Wordle.cpp
+)
+target_link_libraries(wordle_core PUBLIC wordle_ds)
+
+# ---------------------------------------------------------------------------
 # Server executable
-# Game classes (.cpp files in backend/src) are added here as they are written.
 # ---------------------------------------------------------------------------
 add_executable(wordle_server
     backend/src/main.cpp
 )
-target_link_libraries(wordle_server PRIVATE wordle_ds)
+target_link_libraries(wordle_server PRIVATE wordle_core)
 
 # ---------------------------------------------------------------------------
 # Tests (CTest)
@@ -42,8 +54,9 @@ enable_testing()
 
 function(add_dsa_test name)
     add_executable(${name} tests/${name}.cpp)
-    target_link_libraries(${name} PRIVATE wordle_ds)
+    target_link_libraries(${name} PRIVATE wordle_core)
     target_include_directories(${name} PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+    target_compile_definitions(${name} PRIVATE WORDLE_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
@@ -59,3 +72,6 @@ add_dsa_test(test_search)
 add_dsa_test(test_sort)
 add_dsa_test(test_kmp)
 add_dsa_test(test_shuffle)
+add_dsa_test(test_dictionary)
+add_dsa_test(test_board_tracker)
+add_dsa_test(test_wordle)
