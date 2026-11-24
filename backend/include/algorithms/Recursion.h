@@ -68,8 +68,8 @@ inline long long fibonacciTree(int n, long long& calls)
 }
 
 // ----- indirect (mutual) recursion -----
-// A word is "alternating" if consonants and vowels alternate. startsWithVowel
-// and startsWithConsonant call each other, one letter at a time.
+// A word is "alternating" if consonants and vowels alternate. alternatesFromVowel
+// and alternatesFromConsonant call each other, one letter at a time.
 inline bool isVowel(char c)
 {
     return c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
