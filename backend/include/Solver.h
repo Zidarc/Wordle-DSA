@@ -39,6 +39,7 @@
 #include "Constraints.h"
 #include "Dictionary.h"
 #include "algorithms/ListSearch.h"
+#include "ds/ArrayStack.h"
 #include "ds/SafeArray.h"
 #include "ds/SinglyLinkedList.h"
 
@@ -77,6 +78,13 @@ public:
     // constraints, recursively. The result is in sorted order and always
     // equals candidates().
     SafeArray<std::string> generateCandidates(BacktrackStats* stats = nullptr) const;
+
+    // The same search with the recursion simulated by our own ArrayStack
+    // (lab week 9). Each stack frame is (prefix, next letter to try); the
+    // loop pops a frame, tries its next letter, pushes the frame back if it
+    // has letters left, and pushes a new frame one level deeper when the
+    // letter is accepted. Gives exactly the same words in the same order.
+    SafeArray<std::string> generateCandidatesIterative(BacktrackStats* stats = nullptr) const;
 
     // True if some dictionary word starts with prefix. Binary search for the
     // first word >= prefix, then compare its first letters.

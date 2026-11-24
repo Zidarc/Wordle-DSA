@@ -93,3 +93,67 @@ void Solver::extend(std::string& prefix, SafeArray<std::string>& out, BacktrackS
         prefix.pop_back(); // un-choose (backtrack)
     }
 }
+
+namespace
+{
+struct Frame
+{
+    std::string prefix;
+    char next = 'A'; // next letter to try at position prefix.size()
+};
+} // namespace
+
+SafeArray<std::string> Solver::generateCandidatesIterative(BacktrackStats* stats) const
+{
+    BacktrackStats local;
+    SafeArray<std::string> out;
+    ArrayStack<Frame> stack;
+    stack.push(Frame());
+
+    while (!stack.empty())
+    {
+        if (static_cast<int>(stack.size()) > local.maxDepth)
+            local.maxDepth = static_cast<int>(stack.size());
+
+        Frame frame = stack.pop();
+        if (frame.next > 'Z')
+            continue; // every letter tried at this level: backtrack
+
+        const int depth = static_cast<int>(frame.prefix.size());
+        const char c = frame.next;
+
+        Frame sameLevel = frame; // come back later for the following letter
+        ++sameLevel.next;
+        stack.push(sameLevel);
+
+        ++local.nodesVisited;
+        if (!constraints_.allowsLetterAt(depth, c))
+        {
+            ++local.pruned;
+            continue;
+        }
+
+        std::string longer = frame.prefix + c;
+        if (!constraints_.fitsCounts(longer) || !isDictionaryPrefix(longer, &local.prefixChecks))
+        {
+            ++local.pruned;
+            continue;
+        }
+
+        if (static_cast<int>(longer.size()) == Constraints::kLength)
+        {
+            out.pushBack(longer);
+        }
+        else
+        {
+            Frame deeper;
+            deeper.prefix = longer;
+            stack.push(deeper);
+        }
+    }
+
+    local.solutions = static_cast<int>(out.size());
+    if (stats)
+        *stats = local;
+    return out;
+}
