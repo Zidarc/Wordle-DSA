@@ -200,3 +200,84 @@ table.data th.num {
   text-align: right;
   font-family: var(--mono);
 }
+
+/* ---------- board (GUIDE: Board = dynamic 2D array on the server) ---------- */
+
+.board {
+  display: grid;
+  gap: 6px;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(5, 58px);
+  gap: 6px;
+}
+
+.tile {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 1.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: transparent;
+}
+
+.tile-filled {
+  border-color: var(--muted);
+  animation: pop 0.1s ease-out;
+}
+
+.tile-active {
+  border-color: var(--accent);
+}
+
+.tile-correct,
+.tile-present,
+.tile-absent {
+  border-color: transparent;
+  animation: reveal 0.45s ease-out both;
+}
+
+.tile-correct {
+  background: var(--correct);
+}
+
+.tile-present {
+  background: var(--present);
+  color: #1d1300;
+}
+
+.tile-absent {
+  background: var(--absent);
+}
+
+.shake {
+  animation: shake 0.35s;
+}
+
+@keyframes pop {
+  from { transform: scale(0.88); }
+  to { transform: scale(1); }
+}
+
+@keyframes reveal {
+  0% { transform: rotateX(90deg); opacity: 0.2; }
+  100% { transform: rotateX(0); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+@media (max-width: 420px) {
+  .board-row { grid-template-columns: repeat(5, 50px); }
+  .tile { width: 50px; height: 50px; font-size: 1.4rem; }
+}
