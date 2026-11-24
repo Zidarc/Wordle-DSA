@@ -30,6 +30,7 @@
 //   destroy / copy ........... O(n)
 //   size / empty ............. O(1)
 
+#include "ds/BinaryTreeProperties.h"
 #include "ds/Stack.h"
 
 #include <cstddef>
@@ -129,6 +130,22 @@ public:
         return nodeHeight(root_);
     }
 
+    // ----- binary tree properties (see BinaryTreeProperties.h) -----
+
+    std::size_t leafCount() const { return btCountLeaves(root_); }
+    bool isFull() const { return btIsFull(root_); }
+    bool isComplete() const { return btIsComplete(root_); }
+    bool isPerfect() const { return btIsPerfect(root_); }
+    TreeShape shape() const { return btShape(root_); }
+
+    // Checks the AVL invariant on every node: the stored height is correct
+    // and the two subtrees differ in height by at most 1.
+    bool isBalanced() const
+    {
+        int h = 0;
+        return checkBalanced(root_, h);
+    }
+
     // ----- iterative in-order traversal using Stack -----
 
     // Returns the elements in sorted order using an iterative in-order
@@ -136,6 +153,7 @@ public:
     // in tests to confirm the tree stays sorted after rotations.
     //
     // The caller provides a SafeArray to be filled. It is cleared first.
+    // GUIDE 2.5: simulation of recursion - in-order walk with our own Stack
     template <typename Array>
     void toSortedArray(Array& result) const
     {
@@ -170,6 +188,22 @@ private:
 
     // ----- height helpers -----
 
+    static bool checkBalanced(const Node* node, int& height)
+    {
+        if (node == nullptr)
+        {
+            height = 0;
+            return true;
+        }
+        int lh = 0;
+        int rh = 0;
+        if (!checkBalanced(node->left, lh) || !checkBalanced(node->right, rh))
+            return false;
+        height = 1 + (lh > rh ? lh : rh);
+        int diff = lh - rh;
+        return node->height == height && diff >= -1 && diff <= 1;
+    }
+
     static int nodeHeight(const Node* node)
     {
         return node == nullptr ? 0 : node->height;
@@ -192,9 +226,9 @@ private:
     // Single right rotation (LL case).
     //
     //       node             left
-    //       /  \             /   \
+    //       /  \             /   \  .
     //     left   C   =>    A    node
-    //     /  \                  /  \
+    //     /  \                  /  \  .
     //    A    B                B    C
     //
     static Node* rotateRight(Node* node)
@@ -211,9 +245,9 @@ private:
     // Single left rotation (RR case).
     //
     //     node              right
-    //     /  \              /   \
+    //     /  \              /   \  .
     //    A   right   =>   node   C
-    //        /  \         /  \
+    //        /  \         /  \  .
     //       B    C       A    B
     //
     static Node* rotateLeft(Node* node)
@@ -228,6 +262,7 @@ private:
     }
 
     // Rebalances node if its balance factor is outside [-1, +1].
+    // GUIDE 1.6: LL / RR / LR / RL cases are decided here
     static Node* balance(Node* node)
     {
         updateHeight(node);

@@ -96,6 +96,7 @@ public:
         copyFrom(other);
     }
 
+    // GUIDE 1.1: copy first, then clear -> strong exception guarantee
     SinglyLinkedList& operator=(const SinglyLinkedList& other)
     {
         if (this == &other)
@@ -238,6 +239,37 @@ public:
             }
         }
         return false;
+    }
+
+    // Removes every element for which predicate(element) is true, in one
+    // pass over the list (O(n)). Returns how many were removed.
+    // GUIDE 1.3 / 2.6: Solver::applyGuess filters the candidate list with this
+    template <typename Predicate>
+    std::size_t removeAllIf(Predicate predicate)
+    {
+        std::size_t removed = 0;
+        while (head_ != nullptr && predicate(head_->data))
+        {
+            popFront();
+            ++removed;
+        }
+        if (head_ == nullptr)
+            return removed;
+
+        Node* before = head_;
+        while (before->next != nullptr)
+        {
+            if (predicate(before->next->data))
+            {
+                unlinkAfter(before); // keeps tail_ correct when the last node goes
+                ++removed;
+            }
+            else
+            {
+                before = before->next;
+            }
+        }
+        return removed;
     }
 
     void clear()

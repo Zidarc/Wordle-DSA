@@ -130,6 +130,7 @@ public:
 
     // ----- modification -----
 
+    // GUIDE 1.2: capacity doubles when full -> O(1) amortised push
     void pushBack(const T& value)
     {
         if (size_ == capacity_)
@@ -241,6 +242,7 @@ private:
     std::size_t size_;
     std::size_t capacity_;
 
+    // GUIDE 1.2: the "safe" part - every [] goes through this check
     void checkIndex(std::size_t index) const
     {
         if (index >= size_)

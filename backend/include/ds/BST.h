@@ -20,6 +20,8 @@
 //   destroy / copy ........... O(n)
 //   size / empty ............. O(1)
 
+#include "ds/BinaryTreeProperties.h"
+
 #include <cstddef>
 #include <string>
 
@@ -116,12 +118,21 @@ public:
         return height(root_);
     }
 
+    // ----- binary tree properties (see BinaryTreeProperties.h) -----
+
+    std::size_t leafCount() const { return btCountLeaves(root_); }
+    bool isFull() const { return btIsFull(root_); }
+    bool isComplete() const { return btIsComplete(root_); }
+    bool isPerfect() const { return btIsPerfect(root_); }
+    TreeShape shape() const { return btShape(root_); }
+
 private:
     Node* root_;
     std::size_t size_;
 
     // ----- recursive helpers -----
 
+    // GUIDE 1.5: recursive insert - smaller left, larger right
     Node* insert(Node* node, const T& value)
     {
         if (node == nullptr)
@@ -175,6 +186,7 @@ private:
         return 1 + (leftHeight > rightHeight ? leftHeight : rightHeight);
     }
 
+    // GUIDE 2.5: head recursion - children freed before the node
     void destroy(Node* node)
     {
         if (node == nullptr)
