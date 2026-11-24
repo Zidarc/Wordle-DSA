@@ -56,6 +56,26 @@ void bubbleSort(Arr& a, int n, SortCounter* counter = nullptr)
     }
 }
 
+// ---------------------------------------------------------------------------
+// Selection sort: always n(n-1)/2 comparisons, but at most n-1 swaps, so it is
+// the cheapest of the simple sorts when moving an element is expensive.
+// ---------------------------------------------------------------------------
+template <typename Arr>
+void selectionSort(Arr& a, int n, SortCounter* counter = nullptr)
+{
+    for (int i = 0; i < n - 1; i++)
+    {
+        int smallest = i;
+        for (int j = i + 1; j < n; j++)
+        {
+            if (sortLess(a[j], a[smallest], counter))
+                smallest = j;
+        }
+        if (smallest != i)
+            sortSwap(a, i, smallest, counter);
+    }
+}
+
 template <typename Arr>
 void insertionSort(Arr& a, int n)
 {
