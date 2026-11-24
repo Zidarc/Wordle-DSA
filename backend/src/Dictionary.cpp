@@ -40,6 +40,7 @@ const LookupResult& LookupStats::get(LookupMethod method) const
 
 namespace
 {
+// GUIDE 2.1: the time / space table shown in DSA Insights
 const LookupMethodInfo kMethods[Dictionary::kMethodCount] = {
     {LookupMethod::Linear, "linear", "Linear search", "O(1)", "O(n)", "O(n)",
      "O(n) sorted array", "O(1)", "SafeArray (sorted)"},
@@ -99,6 +100,7 @@ std::size_t Dictionary::loadFromFile(const std::string& path)
     return loadFromStream(file);
 }
 
+// GUIDE 3.1: hash table (dedupe) -> radix sort -> AVL + 2-3 tree
 std::size_t Dictionary::loadFromStream(std::istream& input)
 {
     clear();
@@ -211,6 +213,7 @@ LookupResult Dictionary::lookupWith(const std::string& word, LookupMethod method
     return lookupAll(word).get(method);
 }
 
+// GUIDE 2.1 / 3.3: all six lookups on one word, each timed
 LookupStats Dictionary::lookupAll(const std::string& word) const
 {
     LookupStats stats;

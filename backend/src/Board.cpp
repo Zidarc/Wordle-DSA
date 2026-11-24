@@ -82,6 +82,7 @@ std::string Board::rowWord(int row) const
 // Memory
 // ---------------------------------------------------------------------------
 
+// GUIDE 1.11: array of row pointers = dynamic 2D array
 void Board::allocate()
 {
     letters_ = new char*[rows_];

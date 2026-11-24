@@ -79,6 +79,7 @@ SafeArray<LeaderboardEntry> Leaderboard::loadAll() const
     return entries;
 }
 
+// GUIDE 3.6: KMP filter -> MinHeap top 10 -> merge sort
 SafeArray<LeaderboardEntry> Leaderboard::topScores(const std::string& nameFilter) const
 {
     SafeArray<LeaderboardEntry> all = loadAll();

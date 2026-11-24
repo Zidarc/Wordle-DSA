@@ -40,6 +40,7 @@ Wordle::Wordle(const std::string& secret) : secret_(Dictionary::normalize(secret
         letters_.insert(sorted[order[i]]);
 }
 
+// GUIDE 3.3: two-pass colouring (greens first, then yellows / grays)
 GuessFeedback Wordle::evaluate(const std::string& guess) const
 {
     GuessFeedback result;

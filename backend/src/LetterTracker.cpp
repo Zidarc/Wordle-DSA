@@ -38,6 +38,7 @@ LetterTracker::~LetterTracker()
 // Letter status
 // ---------------------------------------------------------------------------
 
+// GUIDE 1.11: direct addressing status_[letter - 'A'], only upgrades
 void LetterTracker::update(const std::string& guess, const LetterState* feedback)
 {
     if (feedback == nullptr)

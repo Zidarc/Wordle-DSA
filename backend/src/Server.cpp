@@ -113,6 +113,7 @@ void Server::setupRoutes()
     });
 
     // POST /api/game/new
+    // GUIDE 3.2: new game route
     http_->Post("/api/game/new", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
         if (!picker_)
@@ -155,6 +156,7 @@ void Server::setupRoutes()
     });
 
     // POST /api/game/guess
+    // GUIDE 3.3: guess route -> GameSession::makeGuess
     http_->Post("/api/game/guess", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
         std::string gameId, guess, methodName;
@@ -484,6 +486,7 @@ void Server::setupRoutes()
     setupDsaRoutes();
 }
 
+// GUIDE 3.7: solver, lookup, trees, Sorting Lab, recent games
 void Server::setupDsaRoutes()
 {
     // GET /api/game/solver?gameId=...&count=5

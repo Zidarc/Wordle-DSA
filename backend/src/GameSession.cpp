@@ -52,6 +52,7 @@ void GameSession::initHintQueue(unsigned int seed)
         hintQueue_.enqueue(positions[i]);
 }
 
+// GUIDE 3.4: dequeue until an unsolved position is found
 HintResult GameSession::useHint()
 {
     HintResult res;
@@ -101,6 +102,7 @@ HintResult GameSession::useHint()
     return res;
 }
 
+// GUIDE 3.3: the life of a guess - start reading here
 GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary& dictionary,
                                    LookupMethod method)
 {

@@ -15,6 +15,7 @@ WordPicker::WordPicker(const SafeArray<std::string>& words, unsigned int seed)
     startNewCycle();
 }
 
+// GUIDE 3.2: secret word = circular list cursor
 std::string WordPicker::nextWord()
 {
     if (rotation_.empty())
