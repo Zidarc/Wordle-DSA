@@ -115,6 +115,30 @@ TEST_CASE(constraintsRejectBadInput)
     CHECK_THROWS(c.add("CRANE", nullptr), std::invalid_argument);
 }
 
+TEST_CASE(constraintsKnownLetterFromHint)
+{
+    Constraints c;
+    c.addKnownLetter(0, 'P');
+    CHECK_EQ(c.fixedAt(0), 'P');
+    CHECK_EQ(c.minCount('P'), 1);
+    CHECK(!c.allowsLetterAt(0, 'A'));
+    CHECK(c.matches("PUNCH"));
+    CHECK(!c.matches("BUNCH"));
+
+    c.addKnownLetter(2, 'P'); // a second fixed copy raises the minimum
+    CHECK_EQ(c.minCount('P'), 2);
+    CHECK(!c.matches("PUNCH"));
+    CHECK(c.matches("PAPER"));
+}
+
+TEST_CASE(constraintsKnownLetterRejectsBadInput)
+{
+    Constraints c;
+    CHECK_THROWS(c.addKnownLetter(-1, 'A'), std::invalid_argument);
+    CHECK_THROWS(c.addKnownLetter(5, 'A'), std::invalid_argument);
+    CHECK_THROWS(c.addKnownLetter(0, 'a'), std::invalid_argument);
+}
+
 // ----- Solver -----
 
 TEST_CASE(solverStartsWithWholeDictionary)
