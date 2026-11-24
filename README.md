@@ -229,12 +229,12 @@ How each topic in the course outline is used, or why it is not.
 | 1 | ADT, C++ specification, pointers, **Rule of Three** | ✅ | Every container is an ADT with a clear interface. Every class that owns dynamic memory implements a destructor, copy constructor and copy assignment operator. |
 | 2 | 1D / 2D dynamic **safe pointers**, **jagged arrays** | ✅ | `SafeArray<T>`, the 2D `Board`, the jagged keyboard rows |
 | 3 | **Singly**, **doubly**, **circular** linked lists | ✅ | Stack and hash chains / game replay / secret-word rotation |
-| 4 | **Recursion**, backtracking | ✅ / ❌ | Recursion: binary search, trees, merge sort. Backtracking: no natural use in Wordle, so not used. |
-| 5 | **Linear**, **binary**, **interpolation** search; elementary sorts | ✅ | All three searches on the dictionary. **Insertion sort** for adding a new score. Bubble, selection and comb sort have no natural use (see stretch goal below). |
-| 7 | Advanced sorts: **radix**, **merge**, quick | ✅ | Radix sort for the dictionary, merge sort for the leaderboard. Quick sort: stretch goal only. |
-| 9 | **Stack**, **queue**, simulation of recursion | ✅ | Guess history stack, hint queue, iterative tree traversal |
-| 10 | Binary trees, **BST** | ✅ | Secret-word BST |
-| 11 | Balanced BST, **AVL tree**; 2-3 trees, B-trees | ✅ / ❌ | AVL tree for the dictionary. 2-3 trees and B-trees are designed for disk storage; the dictionary is small and in memory, so not used. |
+| 4 | **Recursion** and its types, **backtracking** | ✅ (Phase 2) | Recursion: binary search, trees, merge sort, quick sort. Types of recursion (tail, head, tree, indirect, nested) in `Recursion.h`. **Backtracking**: the solver builds candidate words letter by letter and prunes any prefix that breaks the feedback or is not a dictionary prefix. |
+| 5 | **Linear**, **binary**, **interpolation** search using arrays **and linked lists**; elementary sorts | ✅ (Phase 2) | All three searches on the dictionary array. Linear and binary search on the solver's linked list of possible words. **Bubble, selection, insertion and comb sort** in the Sorting Lab; insertion sort also adds a new score. |
+| 7 | Advanced sorts: **radix**, **merge**, **quick** | ✅ (Phase 2) | Radix sort for the dictionary, merge sort for the leaderboard, **quick sort** to rank the solver's suggestions. All three also run in the Sorting Lab. |
+| 9 | **Stack**, **queue**, implementation strategies, simulation of recursion | ✅ (Phase 2) | Linked-list stack and queue (history, hints) **and** array-based `ArrayStack` / circular `ArrayQueue` (recent games). Simulation of recursion: iterative tree traversal, explicit-stack quick sort, explicit-stack backtracking. |
+| 10 | Binary trees and their properties (**full**, **complete**), **BST** | ✅ (Phase 2) | Secret-word BST. Node count, leaf count and full / complete / perfect checks on the BST and AVL tree, reported by `/api/dsa/trees`. |
+| 11 | Balanced BST, **AVL tree**, **2-3 trees**, **B-trees** | ✅ (Phase 2) | AVL tree for the dictionary. A **B-tree of order 3 (2-3 tree)** stores the dictionary as the sixth lookup method, and shows how a wider node gives a shorter tree. |
 | 12 | String search: brute force, Rabin-Karp, Boyer-Moore, **KMP** | ✅ | KMP for leaderboard name search |
 | 13 | **Priority queue / heap**, **hashing**, collision resolution, **rehashing** | ✅ | Min-heap for the top-K leaderboard. Hash table with separate chaining and rehashing. |
 | 14 | Graphs, MST, topological sort, shortest path | ❌ | Wordle has no network or dependency structure, so graphs would be artificial here. |
