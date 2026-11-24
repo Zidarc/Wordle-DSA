@@ -38,6 +38,9 @@ add_library(wordle_core STATIC
     backend/src/GameSession.cpp
     backend/src/Leaderboard.cpp
     backend/src/SortingLab.cpp
+    backend/src/FrequencyTable.cpp
+    backend/src/Constraints.cpp
+    backend/src/Solver.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
 
@@ -93,6 +96,7 @@ add_dsa_test(test_shuffle)
 add_dsa_test(test_dictionary)
 add_dsa_test(test_board_tracker)
 add_dsa_test(test_wordle)
+add_dsa_test(test_solver)
 add_dsa_test(test_score)
 add_dsa_test(test_game_session)
 add_dsa_test(test_leaderboard)
