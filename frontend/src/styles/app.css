@@ -318,3 +318,20 @@ table.data th.num {
 .key-correct { background: var(--correct); }
 .key-present { background: var(--present); color: #1d1300; }
 .key-absent { background: var(--absent); color: var(--muted); }
+
+/* ---------- hints ---------- */
+
+.hint-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.hint-chip {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--correct);
+  font-size: 0.8rem;
+}

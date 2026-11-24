@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Board from './components/Board.jsx';
+import DifficultySelect from './components/DifficultySelect.jsx';
+import HintButton from './components/HintButton.jsx';
 import Keyboard from './components/Keyboard.jsx';
 import useGame from './hooks/useGame.js';
 
@@ -7,7 +9,7 @@ import useGame from './hooks/useGame.js';
 // and the DSA side panels on the right.
 // TIP: all game state is in hooks/useGame.js; all fetches in api/client.js.
 export default function App() {
-  const { game, start, addLetter, removeLetter, submit } = useGame();
+  const { game, start, addLetter, removeLetter, submit, requestHint } = useGame();
   const [difficulty, setDifficulty] = useState('normal');
   const started = useRef(false);
 
@@ -26,11 +28,7 @@ export default function App() {
           <span>hand-built data structures</span>
         </div>
         <div className="controls">
-          <select className="select" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-            <option value="easy">Easy - 8 tries</option>
-            <option value="normal">Normal - 6 tries</option>
-            <option value="hard">Hard - 5 tries</option>
-          </select>
+          <DifficultySelect value={difficulty} onChange={setDifficulty} />
           <button className="btn primary" onClick={() => start(difficulty)}>
             New game
           </button>
@@ -45,6 +43,12 @@ export default function App() {
             current={game.current}
             maxAttempts={game.maxAttempts}
             shake={game.shake}
+          />
+          <HintButton
+            hints={game.hints}
+            hintsUsed={game.hintsUsed}
+            onHint={requestHint}
+            disabled={game.status !== 'playing'}
           />
           <Keyboard
             letterStatus={game.letterStatus}
