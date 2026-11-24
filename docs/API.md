@@ -258,6 +258,72 @@ Returns live structural metrics of the dictionary data structures for the DSA In
   "hashUsedBuckets": 512,
   "hashLongestChain": 4,
   "hashRehashCount": 7,
-  "hashLoadFactor": 0.69
+  "hashLoadFactor": 0.69,
+  "avlLeaves": 351,
+  "avlBalanced": true,
+  "btreeHeight": 9,
+  "btreeNodes": 695
 }
+```
+
+---
+
+## Phase 2 endpoints
+
+The guess response (`POST /api/game/guess`) also gained three fields:
+
+| Field | Meaning |
+|-------|---------|
+| `lookupStats.btree` | Comparisons made by the sixth lookup method, the 2-3 tree |
+| `btreeNodesVisited` | B-tree nodes read on the way down (each holds 1-2 words) |
+| `possibleWords` | Dictionary words that still fit every guess so far (solver's linked list) |
+
+### 9. `GET /api/game/solver?gameId={gameId}&count={n}`
+Rebuilds the solver from the game's replay list and runs the backtracking search twice: recursively and with an explicit `ArrayStack`. Both must report the same numbers. `suggestions` (ranked by letter frequency with quick sort) stays empty until 2 guesses have been made, so it cannot be used to skip the game. `count` defaults to 5.
+
+#### Response (`200 OK`)
+```json
+{
+  "gameId": "game-1-723400",
+  "possibleWords": 4,
+  "backtracking":          { "nodesVisited": 1040, "pruned": 997, "prefixChecks": 1544, "maxDepth": 5, "solutions": 4 },
+  "backtrackingIterative": { "nodesVisited": 1040, "pruned": 997, "prefixChecks": 1544, "maxDepth": 5, "solutions": 4 },
+  "suggestions": [ { "word": "BLAME", "score": 34 }, { "word": "BLADE", "score": 32 } ]
+}
+```
+
+### 10. `GET /api/dsa/sort?limit={n}`
+Sorting Lab. Sorts the same shuffled copy of the dictionary with bubble, selection, insertion, comb, merge, quick and radix sort. `limit` (optional) sorts only the first `n` words.
+
+#### Response (`200 OK`)
+```json
+{
+  "inputSize": 701,
+  "runs": [
+    { "algorithm": "bubble", "complexity": "O(n^2)", "comparisons": 245305, "swaps": 119495, "microseconds": 20423, "sortedCorrectly": true },
+    { "algorithm": "radix",  "complexity": "O(L(n + 26))", "comparisons": 0, "swaps": 3505, "microseconds": 410, "sortedCorrectly": true }
+  ]
+}
+```
+
+### 11. `GET /api/dsa/trees`
+Binary tree properties of the dictionary's AVL tree, and the shape of the 2-3 tree.
+
+#### Response (`200 OK`)
+```json
+{
+  "avl": { "nodes": 701, "leaves": 351, "internalNodes": 350, "singleChildNodes": 0, "height": 10,
+           "minPossibleHeight": 10, "full": true, "complete": false, "perfect": false },
+  "btree": { "order": 3, "keys": 701, "nodes": 695, "height": 9, "valid": true }
+}
+```
+
+### 12. `GET /api/games/recent`
+The last 10 finished games, most recent first. Stored in a bounded circular `ArrayQueue`, which drops the oldest game when full.
+
+#### Response (`200 OK`)
+```json
+[
+  { "gameId": "game-3-118204", "secretWord": "CRANE", "difficulty": "normal", "result": "won", "attempts": 4, "score": 450 }
+]
 ```
