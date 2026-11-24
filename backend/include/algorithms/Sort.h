@@ -4,6 +4,58 @@
 #include <string>
 #include <type_traits>
 
+// Optional counters for the Sorting Lab. Every sort takes a SortCounter*
+// that may be null; when it is not, each element comparison and each element
+// move (a swap, or a copy in insertion / merge / radix sort) is counted.
+struct SortCounter
+{
+    long long comparisons = 0;
+    long long swaps = 0;
+};
+
+// a[i] < a[j], counted.
+template <typename T>
+bool sortLess(const T& x, const T& y, SortCounter* counter)
+{
+    if (counter)
+        counter->comparisons++;
+    return x < y;
+}
+
+template <typename Arr>
+void sortSwap(Arr& a, int i, int j, SortCounter* counter)
+{
+    if (counter)
+        counter->swaps++;
+    typedef typename std::decay<decltype(a[0])>::type T;
+    T temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+}
+
+// ---------------------------------------------------------------------------
+// Bubble sort: O(n^2) comparisons, O(n) on already sorted input because a
+// pass with no swap ends the sort early.
+// ---------------------------------------------------------------------------
+template <typename Arr>
+void bubbleSort(Arr& a, int n, SortCounter* counter = nullptr)
+{
+    for (int pass = 0; pass < n - 1; pass++)
+    {
+        bool swapped = false;
+        for (int i = 0; i < n - 1 - pass; i++)
+        {
+            if (sortLess(a[i + 1], a[i], counter))
+            {
+                sortSwap(a, i, i + 1, counter);
+                swapped = true;
+            }
+        }
+        if (!swapped)
+            break;
+    }
+}
+
 template <typename Arr>
 void insertionSort(Arr& a, int n)
 {
