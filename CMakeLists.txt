@@ -34,16 +34,27 @@ add_library(wordle_core STATIC
     backend/src/Board.cpp
     backend/src/LetterTracker.cpp
     backend/src/Wordle.cpp
+    backend/src/Score.cpp
+    backend/src/GameSession.cpp
+    backend/src/Leaderboard.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
 
 # ---------------------------------------------------------------------------
 # Server executable
+# Server.cpp is the only file that includes cpp-httplib and nlohmann/json,
+# so it is compiled here and not into wordle_core. The tests link only
+# wordle_core and never need the HTTP headers.
 # ---------------------------------------------------------------------------
 add_executable(wordle_server
     backend/src/main.cpp
+    backend/src/Server.cpp
 )
+target_include_directories(wordle_server PRIVATE ${CMAKE_SOURCE_DIR}/backend/third_party)
 target_link_libraries(wordle_server PRIVATE wordle_core)
+if(WIN32)
+    target_link_libraries(wordle_server PRIVATE ws2_32)
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests (CTest)
@@ -75,3 +86,6 @@ add_dsa_test(test_shuffle)
 add_dsa_test(test_dictionary)
 add_dsa_test(test_board_tracker)
 add_dsa_test(test_wordle)
+add_dsa_test(test_score)
+add_dsa_test(test_game_session)
+add_dsa_test(test_leaderboard)
