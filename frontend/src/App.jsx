@@ -5,6 +5,7 @@ import DsaInsights from './components/DsaInsights.jsx';
 import HintButton from './components/HintButton.jsx';
 import HistoryPanel from './components/HistoryPanel.jsx';
 import Keyboard from './components/Keyboard.jsx';
+import LabPanel from './components/LabPanel.jsx';
 import MethodSelect from './components/MethodSelect.jsx';
 import SidePanel from './components/SidePanel.jsx';
 import SolverPanel from './components/SolverPanel.jsx';
@@ -76,6 +77,11 @@ export default function App() {
               id: 'solver',
               label: 'Solver',
               render: () => <SolverPanel gameId={game.gameId} version={game.version} />,
+            },
+            {
+              id: 'lab',
+              label: 'DSA Lab',
+              render: () => <LabPanel version={game.version} />,
             },
             {
               id: 'history',
