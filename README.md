@@ -239,9 +239,9 @@ How each topic in the course outline is used, or why it is not.
 | 13 | **Priority queue / heap**, **hashing**, collision resolution, **rehashing** | ✅ | Min-heap for the top-K leaderboard. Hash table with separate chaining and rehashing. |
 | 14 | Graphs, MST, topological sort, shortest path | ❌ | Wordle has no network or dependency structure, so graphs would be artificial here. |
 
-### Stretch goal: Sorting Lab
+### Sorting Lab (Phase 2)
 
-If time allows after Day 13, a **Sorting Lab** page will sort the dictionary with bubble, selection, insertion, comb, merge, quick and radix sort, and show each algorithm's comparisons, swaps and time side by side. This is optional and is only started once the core game is complete and stable.
+The **Sorting Lab** was a stretch goal and is now part of Phase 2. The backend sorts a shuffled copy of the dictionary with bubble, selection, insertion, comb, merge, quick and radix sort, and `GET /api/dsa/sort` returns each algorithm's comparisons, swaps and time side by side. A frontend page for it can be added later; the data is already available from the API.
 
 ---
 
@@ -859,10 +859,9 @@ The following are intentionally **not** part of this project:
 - Databases (text files only)
 - Online deployment / hosting
 - Mobile applications
-- AI / automatic solver
 - A daily shared word synced with the official game
 - External word or dictionary APIs
-- Graphs, 2-3 trees and B-trees, which have no natural fit in this game (see Section 7)
+- Graphs, MST, topological sort and shortest paths, which have no natural fit in this game (see Section 7)
 
 Major scope changes need agreement from the whole team and the instructor.
 
