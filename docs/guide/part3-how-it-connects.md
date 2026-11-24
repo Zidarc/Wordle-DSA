@@ -193,7 +193,7 @@ mergeSort(top)                    LeaderboardEntry::operator< = higher score fir
 | `GET /api/game/solver?gameId=` | `Solver` + `replayInto` | possible words, backtracking stats (recursive vs explicit stack), suggestions after 2 guesses |
 | `GET /api/games/recent` | — | `recentGames_` (bounded `ArrayQueue`), newest first |
 
-`Solver` holds a **reference** to the dictionary, so it cannot be stored inside a `GameSession` (sessions are copied into the hash table). Instead the server rebuilds it from the session's replay list whenever needed (`replayInto`): cheap, because it is one pass over ≤ 8 guesses.
+`Solver` holds a **reference** to the dictionary, so it cannot be stored inside a `GameSession` (sessions are copied into the hash table). Instead the server rebuilds it from the session's replay list whenever needed (`replayInto`): cheap, because it is one pass over ≤ 8 guesses. After the guesses, every revealed hint (`GameSession::hintRevealedAt`) is applied with `Solver::applyHint`, so a hint narrows the possible words just like a green.
 
 ---
 
@@ -230,7 +230,8 @@ Server routes
 ├─ /game/hint ────► GameSession::useHint ─► Queue::dequeue, Board::stateAt
 ├─ /game/history ─► Stack iterator
 ├─ /game/replay ──► DoublyLinkedList iterator
-├─ /game/solver ──► Solver::applyGuess, generateCandidates ─► extend ─► isDictionaryPrefix
+├─ /game/solver ──► Solver::applyGuess, applyHint ─► Constraints::addKnownLetter
+│                   generateCandidates ─► extend ─► isDictionaryPrefix
 │                   generateCandidatesIterative ─► ArrayStack, isDictionaryPrefix
 │                   suggestions ─► FrequencyTable::build/score, quickSort ─► quickPartition
 ├─ /leaderboard ──► Leaderboard::topScores ─► loadAll, kmpContains ─► buildLps,

@@ -110,6 +110,20 @@ TEST_CASE(gameSessionHintRevealsLetterAndPenalizes)
     CHECK_EQ(hint2.penalty, 100);
 }
 
+TEST_CASE(gameSessionRemembersRevealedPositions)
+{
+    GameSession session("game-1", "CRANE", Difficulty::Normal, 7u);
+    for (int p = 0; p < 5; ++p)
+        CHECK(!session.hintRevealedAt(p));
+
+    HintResult hint = session.useHint();
+    CHECK(hint.available);
+    for (int p = 0; p < 5; ++p)
+        CHECK_EQ(session.hintRevealedAt(p), p == hint.position);
+    CHECK(!session.hintRevealedAt(-1));
+    CHECK(!session.hintRevealedAt(5));
+}
+
 TEST_CASE(gameSessionHardModeEnforcesHintReuse)
 {
     Dictionary dict = makeDictionary();

@@ -82,6 +82,8 @@ public:
     int attemptsUsed() const { return board_.filledRows(); }
     int attemptsLeft() const { return maxAttempts_ - board_.filledRows(); }
     int hintsUsed() const { return hintsUsed_; }
+    // Has the hint for this position been revealed? (false if out of range)
+    bool hintRevealedAt(int pos) const { return pos >= 0 && pos < 5 && hintRevealed_[pos]; }
     int score() const { return score_; }
     const std::string& secretWord() const { return wordle_.secret(); }
 

@@ -65,11 +65,17 @@ json lookupMethodsJson(const LookupStats& stats, LookupMethod used)
 }
 
 // Rebuilds the solver state of a game by replaying its accepted guesses
-// (the doubly linked replay list) in order.
+// (the doubly linked replay list) in order, then its revealed hints.
+// GUIDE 3.7: hints count as known greens, so the solver uses them too
 void replayInto(Solver& solver, const GameSession& session)
 {
     for (const GuessFeedback& fb : session.replay())
         solver.applyGuess(fb.guess, fb.states);
+    for (int pos = 0; pos < Constraints::kLength; ++pos)
+    {
+        if (session.hintRevealedAt(pos))
+            solver.applyHint(pos, session.secretWord()[pos]);
+    }
 }
 
 } // namespace
