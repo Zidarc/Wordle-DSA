@@ -49,6 +49,7 @@ const char* SortingLab::algorithmName(int index)
     return kNames[index];
 }
 
+// GUIDE 2.4: copy input -> run with counter -> time -> verify
 SortRun SortingLab::run(const std::string& algorithm) const
 {
     int which = indexOfAlgorithm(algorithm);

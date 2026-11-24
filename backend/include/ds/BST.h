@@ -132,6 +132,7 @@ private:
 
     // ----- recursive helpers -----
 
+    // GUIDE 1.5: recursive insert - smaller left, larger right
     Node* insert(Node* node, const T& value)
     {
         if (node == nullptr)
@@ -185,6 +186,7 @@ private:
         return 1 + (leftHeight > rightHeight ? leftHeight : rightHeight);
     }
 
+    // GUIDE 2.5: head recursion - children freed before the node
     void destroy(Node* node)
     {
         if (node == nullptr)

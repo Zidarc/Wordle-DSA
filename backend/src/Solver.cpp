@@ -64,6 +64,7 @@ SafeArray<std::string> Solver::generateCandidates(BacktrackStats* stats) const
 }
 
 // One level of the recursion: choose the letter for position prefix.size().
+// GUIDE 2.6: backtracking - choose, explore, un-choose
 void Solver::extend(std::string& prefix, SafeArray<std::string>& out, BacktrackStats& stats) const
 {
     const int depth = static_cast<int>(prefix.size());
@@ -160,6 +161,7 @@ SafeArray<std::string> Solver::generateCandidatesIterative(BacktrackStats* stats
     return out;
 }
 
+// GUIDE 2.6: FrequencyTable score + quickSort ranking
 SafeArray<RankedWord> Solver::suggestions(std::size_t count) const
 {
     FrequencyTable table;

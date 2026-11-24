@@ -23,6 +23,7 @@ void Constraints::reset()
     guesses_ = 0;
 }
 
+// GUIDE 2.6: greens fix a position, grays cap a letter count
 void Constraints::add(const std::string& guess, const LetterState* feedback)
 {
     if (feedback == nullptr)

@@ -5,6 +5,7 @@ int Score::calculate(int maxAttempts, int attemptsUsed, int hintsUsed, Difficult
     return calculate(maxAttempts, attemptsUsed, hintsUsed, scoreMultiplier(difficulty), won);
 }
 
+// GUIDE 3.3: score formula
 int Score::calculate(int maxAttempts, int attemptsUsed, int hintsUsed, double multiplier, bool won)
 {
     if (!won || attemptsUsed <= 0 || attemptsUsed > maxAttempts)

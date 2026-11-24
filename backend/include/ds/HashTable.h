@@ -53,6 +53,7 @@ struct KeyHash<std::string>
 {
     static constexpr std::uint64_t kBase = 31;
 
+    // GUIDE 1.9: polynomial rolling hash, h = h*31 + c (Horner)
     std::uint64_t operator()(const std::string& key) const
     {
         std::uint64_t hash = 0;
@@ -282,6 +283,7 @@ public:
     // Moves every entry into a new array of newBucketCount buckets (rounded up
     // to a prime). Called automatically by insert(); public so it can be shown
     // and tested on its own.
+    // GUIDE 1.9: called by insert() when load factor > 0.75
     void rehash(std::size_t newBucketCount)
     {
         newBucketCount = nextPrime(newBucketCount < 2 ? 2 : newBucketCount);

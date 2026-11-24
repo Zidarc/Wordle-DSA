@@ -153,6 +153,7 @@ public:
     // in tests to confirm the tree stays sorted after rotations.
     //
     // The caller provides a SafeArray to be filled. It is cleared first.
+    // GUIDE 2.5: simulation of recursion - in-order walk with our own Stack
     template <typename Array>
     void toSortedArray(Array& result) const
     {
@@ -225,9 +226,9 @@ private:
     // Single right rotation (LL case).
     //
     //       node             left
-    //       /  \             /   \
+    //       /  \             /   \  .
     //     left   C   =>    A    node
-    //     /  \                  /  \
+    //     /  \                  /  \  .
     //    A    B                B    C
     //
     static Node* rotateRight(Node* node)
@@ -244,9 +245,9 @@ private:
     // Single left rotation (RR case).
     //
     //     node              right
-    //     /  \              /   \
+    //     /  \              /   \  .
     //    A   right   =>   node   C
-    //        /  \         /  \
+    //        /  \         /  \  .
     //       B    C       A    B
     //
     static Node* rotateLeft(Node* node)
@@ -261,6 +262,7 @@ private:
     }
 
     // Rebalances node if its balance factor is outside [-1, +1].
+    // GUIDE 1.6: LL / RR / LR / RL cases are decided here
     static Node* balance(Node* node)
     {
         updateHeight(node);

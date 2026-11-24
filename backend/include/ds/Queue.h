@@ -35,6 +35,7 @@ public:
     Queue(const Queue& other) = default;            // deep copy via SinglyLinkedList
     Queue& operator=(const Queue& other) = default; // deep copy via SinglyLinkedList
 
+    // GUIDE 1.4 / 3.4: hint positions are queued here at game start
     void enqueue(const T& value)
     {
         list_.pushBack(value);

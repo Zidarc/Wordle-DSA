@@ -89,6 +89,7 @@ public:
     //   - heap not full yet          -> push it
     //   - value beats the root       -> it replaces the root
     //   - otherwise                  -> discard it
+    // GUIDE 1.10 / 3.6: top-10 leaderboard trick
     bool pushBounded(const T& value, std::size_t capacity)
     {
         if (capacity == 0)
@@ -168,6 +169,7 @@ private:
 
     // Moves the element at i down, swapping with its smaller child, until
     // neither child is ordered before it.
+    // GUIDE 1.10: swap with the smaller child until the heap property holds
     void siftDown(std::size_t i)
     {
         const std::size_t n = data_.size();

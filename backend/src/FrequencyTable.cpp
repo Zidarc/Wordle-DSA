@@ -129,6 +129,7 @@ int FrequencyTable::wordsContaining(char letter) const
     return totals_[l];
 }
 
+// GUIDE 1.11 / 2.6: 5 x 26 table lookups, repeated letters count once
 long long FrequencyTable::score(const std::string& word) const
 {
     if (static_cast<int>(word.size()) != kPositions)

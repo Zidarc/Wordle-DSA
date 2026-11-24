@@ -12,6 +12,7 @@ inline std::mt19937& shuffleGenerator()
     return generator;
 }
 
+// GUIDE 2.7: used by WordPicker, hint queue and SortingLab
 template <typename Arr>
 void fisherYatesWith(Arr& a, int n, std::mt19937& generator)
 {

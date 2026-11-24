@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+// GUIDE 3.1: startup - read Server::Server next
 int main()
 {
     std::cout << "========================================\n";

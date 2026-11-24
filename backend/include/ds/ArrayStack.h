@@ -70,6 +70,7 @@ public:
         return *this;
     }
 
+    // GUIDE 1.4: array strategy - compare with Stack.h (linked)
     void push(const T& value)
     {
         if (size_ == capacity_)

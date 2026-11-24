@@ -133,6 +133,7 @@ public:
     }
 
     // Counts key comparisons and the nodes visited on the way down.
+    // GUIDE 1.8 / 2.1: the "btree" lookup method in DSA Insights
     bool search(const T& key, int& comparisons, int& nodesVisited) const
     {
         const Node* node = root_;
@@ -233,6 +234,7 @@ private:
 
     // parent->children[index] holds Order keys. Its middle key moves up into
     // parent, and its right half becomes a new node at children[index + 1].
+    // GUIDE 1.8: overflow -> middle key moves up, node splits in two
     void splitChild(Node* parent, int index)
     {
         Node* full = parent->children[index];

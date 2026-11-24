@@ -37,6 +37,7 @@ public:
     Stack(const Stack& other) = default;            // deep copy via SinglyLinkedList
     Stack& operator=(const Stack& other) = default; // deep copy via SinglyLinkedList
 
+    // GUIDE 1.4: top of stack = head of list (pop stays O(1))
     void push(const T& value)
     {
         list_.pushFront(value);
