@@ -717,6 +717,25 @@ The order is deliberate. Each step depends on the one before it.
 
 If a day's task is not finished, the owner states this in the handoff, and the next owner finishes it before starting their own task. **A broken feature is never merged just to stay on schedule.**
 
+### Phase 2: DSA Extensions (from 24 November 2026)
+
+The core game was finished on schedule. Phase 2 maps the project onto the **Data Structures Lab outline (CL-2001)** more closely, so every lab topic has a real use in the backend. The frontend is left as it is in this phase; the new data is exposed through the API first.
+
+| Step | Work | Lab week | Branch |
+|------|------|----------|--------|
+| P1 | `ArrayStack<T>` and circular-array `ArrayQueue<T>` (second implementation strategy for stack and queue) + tests | 9 | `feature/array-stack-queue` |
+| P2 | Bubble, selection, comb and **quick sort** (recursive and explicit-stack), with comparison / swap counters + tests | 5, 7, 9 | `feature/elementary-sorts` |
+| P3 | `SortingLab`: runs all seven sorts on a copy of the dictionary and reports comparisons, swaps and time + tests | 5, 7 | `feature/sorting-lab` |
+| P4 | Binary tree properties on `BST` and `AVLTree`: node count, leaf count, full / complete / perfect checks + tests | 10 | `feature/tree-properties` |
+| P5 | `BTree<T>` of order 3 (a **2-3 tree**) as the **sixth** dictionary lookup method + tests | 11 | `feature/btree` |
+| P6 | Linear and binary search on a **linked list** (middle found with slow / fast pointers) + tests | 5 | `feature/linked-list-search` |
+| P7 | `Solver`: possible-words list (singly linked list), **backtracking** candidate generator (recursive and with an explicit stack), 5 × 26 letter-frequency table, ranking with quick sort + tests | 2, 3, 4, 7, 9 | `feature/solver` |
+| P8 | Types of recursion (tail, head, tree, indirect, nested) collected in one header with tests | 4 | `feature/recursion-types` |
+| P9 | `GameSession` and `Server`: solver data after every guess, `/api/dsa/sort`, `/api/dsa/trees`, `/api/game/solver`, recent-games buffer (`ArrayQueue`), `docs/API.md` | — | `feature/server-dsa-routes` |
+| P10 | README, `docs/COMPLEXITY_ANALYSIS.md`, `docs/ARCHITECTURE.md` | — | `docs/phase2` |
+
+Each step is merged into `develop` only when every CTest test passes.
+
 ---
 
 ## 17. Testing Requirements
