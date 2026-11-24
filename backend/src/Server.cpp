@@ -1,5 +1,8 @@
 #include "Server.h"
 
+#include "Solver.h"
+#include "SortingLab.h"
+
 #include "httplib.h"
 #include "json.hpp"
 
@@ -34,6 +37,14 @@ std::string currentDate()
     char buf[32];
     std::strftime(buf, sizeof(buf), "%Y-%m-%d", &tm);
     return std::string(buf);
+}
+
+// Rebuilds the solver state of a game by replaying its accepted guesses
+// (the doubly linked replay list) in order.
+void replayInto(Solver& solver, const GameSession& session)
+{
+    for (const GuessFeedback& fb : session.replay())
+        solver.applyGuess(fb.guess, fb.states);
 }
 
 } // namespace
@@ -159,8 +170,10 @@ void Server::setupRoutes()
             {"binary", result.lookupStats.binary.comparisons},
             {"interpolation", result.lookupStats.interpolation.comparisons},
             {"avl", result.lookupStats.avl.comparisons},
+            {"btree", result.lookupStats.btree.comparisons},
             {"hash", result.lookupStats.hash.comparisons}
         };
+        reply["btreeNodesVisited"] = result.lookupStats.btreeNodesVisited;
 
         if (!result.accepted)
         {
@@ -197,6 +210,11 @@ void Server::setupRoutes()
                 letterStatus[std::string(1, c)] = toString(state);
         }
         reply["letterStatus"] = letterStatus;
+
+        // How many dictionary words still fit all the feedback (solver list)
+        Solver solver(dictionary_);
+        replayInto(solver, *session);
+        reply["possibleWords"] = solver.remaining();
 
         // Secret word revealed only after game ends
         if (session->isGameOver())
