@@ -476,15 +476,21 @@ Wordle-DSA/
 │   │   │   ├── DoublyLinkedList.h
 │   │   │   ├── CircularLinkedList.h
 │   │   │   ├── Stack.h
+│   │   │   ├── ArrayStack.h        # Phase 2: array-based stack
 │   │   │   ├── Queue.h
+│   │   │   ├── ArrayQueue.h        # Phase 2: circular-array queue
 │   │   │   ├── BST.h
 │   │   │   ├── AVLTree.h
+│   │   │   ├── BTree.h             # Phase 2: B-tree / 2-3 tree
+│   │   │   ├── BinaryTreeProperties.h
 │   │   │   ├── HashTable.h
 │   │   │   └── MinHeap.h
 │   │   │
 │   │   ├── algorithms/
 │   │   │   ├── Search.h            # Linear, binary, interpolation
-│   │   │   ├── Sort.h              # Radix, merge, insertion
+│   │   │   ├── Sort.h              # Radix, merge, insertion, bubble, selection, comb, quick
+│   │   │   ├── ListSearch.h        # Linear / binary search on a linked list
+│   │   │   ├── Recursion.h         # Types of recursion
 │   │   │   ├── StringSearch.h      # KMP
 │   │   │   └── Shuffle.h           # Fisher–Yates
 │   │   │
@@ -497,6 +503,10 @@ Wordle-DSA/
 │   │   ├── GameSession.h           # One game: board, tracker, stack, queue, replay
 │   │   ├── Score.h                 # Score calculation
 │   │   ├── Leaderboard.h           # File, heap, merge sort, KMP search
+│   │   ├── SortingLab.h            # Seven sorts side by side
+│   │   ├── FrequencyTable.h        # 5 x 26 letter counts (2D array)
+│   │   ├── Constraints.h           # What the feedback says about the secret word
+│   │   ├── Solver.h                # Candidate list, backtracking, suggestions
 │   │   └── Server.h                # HTTP routes
 │   │
 │   ├── src/
@@ -509,6 +519,10 @@ Wordle-DSA/
 │   │   ├── GameSession.cpp
 │   │   ├── Score.cpp
 │   │   ├── Leaderboard.cpp
+│   │   ├── SortingLab.cpp
+│   │   ├── FrequencyTable.cpp
+│   │   ├── Constraints.cpp
+│   │   ├── Solver.cpp
 │   │   └── Server.cpp
 │   │
 │   └── third_party/
@@ -558,6 +572,14 @@ Wordle-DSA/
 │   ├── test_dictionary.cpp
 │   ├── test_board_tracker.cpp
 │   ├── test_wordle.cpp
+│   ├── test_array_stack_queue.cpp
+│   ├── test_sort_counters.cpp
+│   ├── test_sorting_lab.cpp
+│   ├── test_tree_properties.cpp
+│   ├── test_btree.cpp
+│   ├── test_list_search.cpp
+│   ├── test_solver.cpp
+│   ├── test_recursion.cpp
 │   ├── test_game_session.cpp
 │   ├── test_score.cpp
 │   └── test_leaderboard.cpp
@@ -818,6 +840,16 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 - Replay list walks forward and backward
 - Each difficulty multiplier; hint penalty; loss gives 0; never below 0
 - Leaderboard save and reload; missing `scores.txt`; top 10 sorted highest first; equal scores; name search
+
+**Phase 2**
+- Array stack: LIFO, growth by doubling, deep copy. Circular queue: wrap-around, growth keeps order, bounded mode drops the oldest
+- Bubble, selection, comb, quick sort (both versions): empty, sorted, reversed, duplicates; counters match the theory (selection n(n-1)/2 comparisons, radix 0)
+- Sorting Lab: all seven sorts give the dictionary's order
+- Tree properties: full-not-complete, complete-not-full, perfect, a gap on the last level; AVL invariant on 2000 inserts
+- 2-3 tree: root split, all leaves on one level after sorted insert, higher order gives a shorter tree, deep copy
+- Linked list search: binary and linear agree for every list size; binary uses O(log n) comparisons but O(n) pointer moves
+- Solver: constraints from repeated letters, backtracking (both versions) equals the filtered list, pruning, ranking
+- Recursion types: tail, head, tree, indirect, nested
 
 ---
 
