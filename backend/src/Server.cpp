@@ -39,6 +39,31 @@ std::string currentDate()
     return std::string(buf);
 }
 
+// One row per lookup method: answer, comparisons, time and Big-O.
+// TIP: the frontend's DSA Insights table is drawn straight from this.
+json lookupMethodsJson(const LookupStats& stats, LookupMethod used)
+{
+    json rows = json::array();
+    for (int i = 0; i < Dictionary::kMethodCount; ++i)
+    {
+        const LookupMethodInfo& info = Dictionary::methodInfo(i);
+        const LookupResult& r = stats.get(info.method);
+        rows.push_back({{"key", info.key},
+                        {"name", info.name},
+                        {"structure", info.structure},
+                        {"found", r.found},
+                        {"comparisons", r.comparisons},
+                        {"nanoseconds", r.nanoseconds},
+                        {"timeBest", info.timeBest},
+                        {"timeAvg", info.timeAvg},
+                        {"timeWorst", info.timeWorst},
+                        {"spaceStructure", info.spaceStructure},
+                        {"spaceExtra", info.spaceExtra},
+                        {"used", info.method == used}});
+    }
+    return rows;
+}
+
 // Rebuilds the solver state of a game by replaying its accepted guesses
 // (the doubly linked replay list) in order.
 void replayInto(Solver& solver, const GameSession& session)
@@ -132,12 +157,13 @@ void Server::setupRoutes()
     // POST /api/game/guess
     http_->Post("/api/game/guess", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::string gameId, guess;
+        std::string gameId, guess, methodName;
         try
         {
             auto body = json::parse(req.body);
             gameId = body.value("gameId", "");
             guess = body.value("guess", "");
+            methodName = body.value("method", "hash");
         }
         catch (...)
         {
@@ -154,7 +180,16 @@ void Server::setupRoutes()
             return;
         }
 
-        GuessResult result = session->makeGuess(guess, dictionary_);
+        LookupMethod method = LookupMethod::Hash;
+        if (!Dictionary::methodFromString(methodName, method))
+        {
+            res.status = 400;
+            res.set_content(json{{"error", "Unknown lookup method '" + methodName + "'"}}.dump(),
+                            "application/json");
+            return;
+        }
+
+        GuessResult result = session->makeGuess(guess, dictionary_, method);
 
         json reply;
         reply["guess"] = Dictionary::normalize(guess);
@@ -174,6 +209,8 @@ void Server::setupRoutes()
             {"hash", result.lookupStats.hash.comparisons}
         };
         reply["btreeNodesVisited"] = result.lookupStats.btreeNodesVisited;
+        reply["methodUsed"] = Dictionary::methodInfo(result.methodUsed).key;
+        reply["lookupMethods"] = lookupMethodsJson(result.lookupStats, result.methodUsed);
 
         if (!result.accepted)
         {
@@ -508,6 +545,37 @@ void Server::setupDsaRoutes()
             {"backtrackingIterative", statsJson(iter)},
             {"suggestions", suggestions}
         };
+        res.status = 200;
+        res.set_content(reply.dump(), "application/json");
+    });
+
+    // GET /api/dsa/lookup?word=CRANE&method=avl
+    // Looks any word up with all six methods (no game needed): answer,
+    // comparisons, average time in ns, and time / space complexity.
+    http_->Get("/api/dsa/lookup", [this](const httplib::Request& req, httplib::Response& res) {
+        setCors(res);
+        std::string word = req.get_param_value("word");
+        LookupMethod method = LookupMethod::Hash;
+        if (req.has_param("method") && !Dictionary::methodFromString(req.get_param_value("method"), method))
+        {
+            res.status = 400;
+            res.set_content(json{{"error", "Unknown lookup method"}}.dump(), "application/json");
+            return;
+        }
+        if (!Dictionary::isWellFormed(word))
+        {
+            res.status = 400;
+            res.set_content(json{{"error", "Word must be 5 letters A-Z"}}.dump(), "application/json");
+            return;
+        }
+
+        LookupStats stats = dictionary_.lookupAll(word);
+        json reply = {{"word", stats.word},
+                      {"found", stats.get(method).found},
+                      {"methodUsed", Dictionary::methodInfo(method).key},
+                      {"wordCount", dictionary_.size()},
+                      {"timingRepeats", Dictionary::kTimingRepeats},
+                      {"methods", lookupMethodsJson(stats, method)}};
         res.status = 200;
         res.set_content(reply.dump(), "application/json");
     });
