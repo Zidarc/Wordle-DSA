@@ -232,6 +232,7 @@ public:
 
     // Moves the cursor one step around the cycle (the last element wraps to the first)
     // and returns the element it lands on.
+    // GUIDE 1.3 / 3.2: WordPicker::nextWord moves the cursor with this
     const T& advance()
     {
         checkNotEmpty("advance");

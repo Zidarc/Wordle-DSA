@@ -77,6 +77,7 @@ bool btIsFull(const Node* node)
 
 // Level-order walk: once a missing child has been seen, no later node in the
 // walk may have a child.
+// GUIDE 1.7: level-order walk with Queue; no child allowed after a gap
 template <typename Node>
 bool btIsComplete(const Node* root)
 {

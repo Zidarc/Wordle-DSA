@@ -79,6 +79,7 @@ public:
 
     // Adds value at the back. In bounded mode a full queue first drops its
     // oldest element; returns true when that happened.
+    // GUIDE 1.4: (front_ + size_) % capacity_ is the wrap-around
     bool enqueue(const T& value)
     {
         bool dropped = false;

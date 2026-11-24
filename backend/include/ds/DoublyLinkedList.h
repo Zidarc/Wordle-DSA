@@ -146,6 +146,7 @@ public:
         ++size_;
     }
 
+    // GUIDE 1.3 / 3.4: GameSession::replay_ appends each guess here
     void pushBack(const T& value)
     {
         Node* node = new Node(value, tail_, nullptr);
