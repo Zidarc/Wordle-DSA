@@ -53,6 +53,8 @@ The game logic, word validation, hints, history, scoring and leaderboard are all
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, branch rules and daily handoff format.
 
+> **Studying the code?** Start with the [Study Guide](docs/guide/README.md). Comments marked `GUIDE x.y` in the code point to its sections.
+
 ---
 
 ## 2. Project Purpose
@@ -776,7 +778,7 @@ The core game was finished on schedule. Phase 2 maps the project onto the **Data
 
 Each step is merged into `develop` only when every CTest test passes.
 
-**Status (24 Nov 2026):** P1–P9 are merged into `develop` (25 CTest suites passing). Still open: frontend pages for the solver, Sorting Lab and tree data, and `docs/COMPLEXITY_ANALYSIS.md` / `docs/ARCHITECTURE.md`.
+**Status (24 Nov 2026):** P1–P9 are merged into `develop` (25 CTest suites passing). Frontend pages for the solver, Sorting Lab, tree data, lookup-method choice and recent games were added afterwards, together with the three-part [Study Guide](docs/guide/README.md), which replaces the planned `COMPLEXITY_ANALYSIS.md` / `ARCHITECTURE.md`.
 
 ---
 
@@ -891,7 +893,7 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 | Quick sort | Sorting Lab, suggestions | O(n log n) average, O(n²) worst |
 | Full / complete / perfect check | Recursion / level-order with Queue | O(n) |
 
-The full analysis will be in `docs/COMPLEXITY_ANALYSIS.md`.
+The full explanation of every structure, algorithm and request flow is in the **[Study Guide](docs/guide/README.md)** (Part 1: data structures, Part 2: algorithms, Part 3: how it all connects).
 
 ---
 
