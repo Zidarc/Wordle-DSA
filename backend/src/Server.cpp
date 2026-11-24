@@ -460,8 +460,22 @@ void Server::setupRoutes()
             return;
         }
 
+        if (session->scoreSaved())
+        {
+            res.status = 409;
+            res.set_content(json{{"error", "Score for this game is already saved"}}.dump(), "application/json");
+            return;
+        }
+
         std::string today = currentDate();
-        leaderboard_.addScore(name, session->score(), toString(session->difficulty()), today);
+        name = Leaderboard::cleanName(name);
+        if (!leaderboard_.addScore(name, session->score(), toString(session->difficulty()), today))
+        {
+            res.status = 500;
+            res.set_content(json{{"error", "Could not write the scores file"}}.dump(), "application/json");
+            return;
+        }
+        session->markScoreSaved();
 
         res.status = 200;
         res.set_content(json{

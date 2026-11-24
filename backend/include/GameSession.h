@@ -85,6 +85,11 @@ public:
     // Has the hint for this position been revealed? (false if out of range)
     bool hintRevealedAt(int pos) const { return pos >= 0 && pos < 5 && hintRevealed_[pos]; }
     int score() const { return score_; }
+
+    // A won game goes on the leaderboard once. The server checks this before
+    // saving, so the same win cannot be posted again and again.
+    bool scoreSaved() const { return scoreSaved_; }
+    void markScoreSaved() { scoreSaved_ = true; }
     const std::string& secretWord() const { return wordle_.secret(); }
 
     const Board& board() const { return board_; }
@@ -112,6 +117,7 @@ private:
     bool hintRevealed_[5];
     GameStatus status_;
     int score_;
+    bool scoreSaved_;
 
     void initHintQueue(unsigned int seed);
 };

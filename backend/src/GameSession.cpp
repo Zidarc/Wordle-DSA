@@ -13,7 +13,8 @@ GameSession::GameSession()
       board_(6, 5),
       hintsUsed_(0),
       status_(GameStatus::Playing),
-      score_(0)
+      score_(0),
+      scoreSaved_(false)
 {
     for (int i = 0; i < 5; ++i)
         hintRevealed_[i] = false;
@@ -29,7 +30,8 @@ GameSession::GameSession(const std::string& id, const std::string& secretWord,
       board_(::maxAttempts(difficulty), 5),
       hintsUsed_(0),
       status_(GameStatus::Playing),
-      score_(0)
+      score_(0),
+      scoreSaved_(false)
 {
     for (int i = 0; i < 5; ++i)
         hintRevealed_[i] = false;
