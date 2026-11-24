@@ -56,7 +56,10 @@ export default function useGame(method = 'hash') {
     }
   }, [flash]);
 
+  // While a guess is on its way to the server, typing is ignored: the reply
+  // clears the row, so those letters would vanish anyway.
   const addLetter = useCallback((letter) => {
+    if (busy.current) return;
     setGame((g) =>
       g.status !== 'playing' || g.current.length >= WORD_LENGTH
         ? g
@@ -65,6 +68,7 @@ export default function useGame(method = 'hash') {
   }, []);
 
   const removeLetter = useCallback(() => {
+    if (busy.current) return;
     setGame((g) => (g.status !== 'playing' ? g : { ...g, current: g.current.slice(0, -1) }));
   }, []);
 
