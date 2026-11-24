@@ -22,10 +22,7 @@ endif()
 # Data structures and algorithms (header-only templates)
 # ---------------------------------------------------------------------------
 add_library(wordle_ds INTERFACE)
-target_include_directories(wordle_ds INTERFACE 
-    ${CMAKE_SOURCE_DIR}/backend/include
-    ${CMAKE_SOURCE_DIR}/backend/third_party
-)
+target_include_directories(wordle_ds INTERFACE ${CMAKE_SOURCE_DIR}/backend/include)
 
 # ---------------------------------------------------------------------------
 # Game classes (.h in backend/include, .cpp in backend/src)
@@ -40,19 +37,20 @@ add_library(wordle_core STATIC
     backend/src/Score.cpp
     backend/src/GameSession.cpp
     backend/src/Leaderboard.cpp
-    backend/src/Server.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
-if(WIN32)
-    target_link_libraries(wordle_core PUBLIC ws2_32)
-endif()
 
 # ---------------------------------------------------------------------------
 # Server executable
+# Server.cpp is the only file that includes cpp-httplib and nlohmann/json,
+# so it is compiled here and not into wordle_core. The tests link only
+# wordle_core and never need the HTTP headers.
 # ---------------------------------------------------------------------------
 add_executable(wordle_server
     backend/src/main.cpp
+    backend/src/Server.cpp
 )
+target_include_directories(wordle_server PRIVATE ${CMAKE_SOURCE_DIR}/backend/third_party)
 target_link_libraries(wordle_server PRIVATE wordle_core)
 if(WIN32)
     target_link_libraries(wordle_server PRIVATE ws2_32)
