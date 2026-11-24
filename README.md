@@ -611,7 +611,7 @@ The generic containers and algorithms in `include/ds/` and `include/algorithms/`
 | Tool | Purpose |
 |------|---------|
 | Git | Version control |
-| Visual Studio 2022 (Desktop development with C++) **or** MinGW-w64 g++ | C++17 compiler |
+| Visual Studio 2022 or newer (Desktop development with C++) **or** MinGW-w64 g++ 8 or newer | C++17 compiler. The server needs `std::thread` and Windows 8+ socket headers, so the old MinGW.org GCC 6.3 can build the tests but not `wordle_server` |
 | CMake 3.16 or newer | Backend build |
 | Node.js 20 LTS or newer (includes npm) | Frontend tooling |
 | VS Code / Dev-C++ | Editors |
@@ -775,6 +775,8 @@ The core game was finished on schedule. Phase 2 maps the project onto the **Data
 | P10 | README, `docs/COMPLEXITY_ANALYSIS.md`, `docs/ARCHITECTURE.md` | — | `docs/phase2` |
 
 Each step is merged into `develop` only when every CTest test passes.
+
+**Status (24 Nov 2026):** P1–P9 are merged into `develop` (25 CTest suites passing). Still open: frontend pages for the solver, Sorting Lab and tree data, and `docs/COMPLEXITY_ANALYSIS.md` / `docs/ARCHITECTURE.md`.
 
 ---
 
