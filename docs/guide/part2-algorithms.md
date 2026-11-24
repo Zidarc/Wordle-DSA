@@ -153,6 +153,7 @@ The general recipe: each stack entry holds what a call's local variables would h
 | `banned_[pos][letter]` | a yellow or gray at pos |
 | `minCount_[letter]` | greens + yellows of that letter in one guess |
 | `maxCount_[letter]` | becomes exact when the same guess also has that letter gray |
+| `fixed_[pos]` + `minCount_` | a revealed **hint** (`addKnownLetter`): treated as a green that came from no guess |
 
 Example, secret APPLE, guess PUPPY → P: 1 yellow + 1 green + 1 gray ⇒ exactly 2 P's.
 
@@ -160,7 +161,7 @@ Three checks use them: `allowsLetterAt(pos, c)`, `fitsCounts(prefix)` (too many 
 
 ### Two ways to find the possible words
 
-1. **Filtering the linked list** (`applyGuess`): `candidates_.removeAllIf(!matches)` — one O(n) pass after each guess.
+1. **Filtering the linked list** (`applyGuess`, and `applyHint` for a revealed hint): `candidates_.removeAllIf(!matches)` — one O(n) pass after each guess or hint.
 2. **Backtracking** (`generateCandidates` → `extend`): build words letter by letter.
 
 ```

@@ -276,10 +276,10 @@ The guess response (`POST /api/game/guess`) also gained three fields:
 |-------|---------|
 | `lookupStats.btree` | Comparisons made by the sixth lookup method, the 2-3 tree |
 | `btreeNodesVisited` | B-tree nodes read on the way down (each holds 1-2 words) |
-| `possibleWords` | Dictionary words that still fit every guess so far (solver's linked list) |
+| `possibleWords` | Dictionary words that still fit every guess and revealed hint so far (solver's linked list) |
 
 ### 9. `GET /api/game/solver?gameId={gameId}&count={n}`
-Rebuilds the solver from the game's replay list and runs the backtracking search twice: recursively and with an explicit `ArrayStack`. Both must report the same numbers. `suggestions` (ranked by letter frequency with quick sort) stays empty until 2 guesses have been made, so it cannot be used to skip the game. `count` defaults to 5.
+Rebuilds the solver from the game's replay list (plus any revealed hints, each treated as a known green) and runs the backtracking search twice: recursively and with an explicit `ArrayStack`. Both must report the same numbers. `suggestions` (ranked by letter frequency with quick sort) stays empty until 2 guesses have been made, so it cannot be used to skip the game. `count` defaults to 5.
 
 #### Response (`200 OK`)
 ```json
