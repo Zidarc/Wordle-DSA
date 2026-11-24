@@ -1,5 +1,7 @@
 #include "Solver.h"
 
+#include "algorithms/Sort.h"
+
 Solver::Solver(const Dictionary& dictionary)
     : dictionary_(dictionary)
 {
@@ -156,4 +158,25 @@ SafeArray<std::string> Solver::generateCandidatesIterative(BacktrackStats* stats
     if (stats)
         *stats = local;
     return out;
+}
+
+SafeArray<RankedWord> Solver::suggestions(std::size_t count) const
+{
+    FrequencyTable table;
+    table.build(candidates_);
+
+    SafeArray<RankedWord> ranked;
+    ranked.reserve(candidates_.size());
+    for (const std::string& word : candidates_)
+    {
+        RankedWord r;
+        r.word = word;
+        r.score = table.score(word);
+        ranked.pushBack(r);
+    }
+    quickSort(ranked, static_cast<int>(ranked.size()));
+
+    while (ranked.size() > count)
+        ranked.popBack();
+    return ranked;
 }

@@ -37,6 +37,7 @@
 // Without pruning there would be 26^5 = 11,881,376 leaves to try.
 
 #include "Constraints.h"
+#include "FrequencyTable.h"
 #include "Dictionary.h"
 #include "algorithms/ListSearch.h"
 #include "ds/ArrayStack.h"
@@ -53,6 +54,21 @@ struct BacktrackStats
     long long prefixChecks = 0; // binary-search comparisons for "is this a prefix?"
     int maxDepth = 0;           // deepest recursion level / largest stack size
     int solutions = 0;
+};
+
+// A suggested guess and its letter-frequency score.
+struct RankedWord
+{
+    std::string word;
+    long long score = 0;
+
+    // "Less" means "ranks earlier": higher score first, then A-Z.
+    bool operator<(const RankedWord& other) const
+    {
+        if (score != other.score)
+            return score > other.score;
+        return word < other.word;
+    }
 };
 
 class Solver
@@ -85,6 +101,11 @@ public:
     // has letters left, and pushes a new frame one level deeper when the
     // letter is accepted. Gives exactly the same words in the same order.
     SafeArray<std::string> generateCandidatesIterative(BacktrackStats* stats = nullptr) const;
+
+    // The best next guesses among the possible words: a FrequencyTable is
+    // built from the candidates, every candidate is scored, and the scores
+    // are ranked with quick sort (lab week 7). Returns at most `count` words.
+    SafeArray<RankedWord> suggestions(std::size_t count = 5) const;
 
     // True if some dictionary word starts with prefix. Binary search for the
     // first word >= prefix, then compare its first letters.
