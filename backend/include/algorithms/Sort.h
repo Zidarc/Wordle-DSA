@@ -1,6 +1,8 @@
 #ifndef SORT_H
 #define SORT_H
 
+#include "ds/ArrayStack.h"
+
 #include <string>
 #include <type_traits>
 
@@ -175,6 +177,119 @@ void mergeSort(Arr& a, int n, SortCounter* counter = nullptr)
     T* temp = new T[n];
     mergeSortRange(a, temp, 0, n - 1, counter);
     delete[] temp;
+}
+
+// ---------------------------------------------------------------------------
+// Quick sort
+//
+// Partition (Lomuto): the pivot is chosen as the median of a[low], a[mid] and
+// a[high], moved to a[high], and every element smaller than it is swapped to
+// the left part. The pivot then goes between the two parts, at its final
+// position. Median-of-three keeps already sorted input (the dictionary after
+// radix sort) away from the O(n^2) worst case.
+//
+// Two versions:
+//   quickSort            recursive (tree recursion: two calls per level)
+//   quickSortIterative   simulation of recursion: the ranges still to sort are
+//                        kept on our own ArrayStack instead of the call stack.
+//                        The larger part is pushed first so the smaller one
+//                        is handled next, which keeps the stack O(log n) deep.
+//
+// Time: O(n log n) average, O(n^2) worst. Not stable.
+// ---------------------------------------------------------------------------
+template <typename Arr>
+int quickPartition(Arr& a, int low, int high, SortCounter* counter)
+{
+    int mid = low + (high - low) / 2;
+    if (sortLess(a[mid], a[low], counter))
+        sortSwap(a, mid, low, counter);
+    if (sortLess(a[high], a[low], counter))
+        sortSwap(a, high, low, counter);
+    if (sortLess(a[mid], a[high], counter))
+        sortSwap(a, mid, high, counter); // now a[high] is the median of the three
+
+    typedef typename std::decay<decltype(a[0])>::type T;
+    T pivot = a[high];
+    int boundary = low; // a[low .. boundary-1] < pivot
+    for (int i = low; i < high; i++)
+    {
+        if (sortLess(a[i], pivot, counter))
+        {
+            if (i != boundary)
+                sortSwap(a, i, boundary, counter);
+            boundary++;
+        }
+    }
+    if (boundary != high)
+        sortSwap(a, boundary, high, counter);
+    return boundary;
+}
+
+template <typename Arr>
+void quickSortRange(Arr& a, int low, int high, SortCounter* counter)
+{
+    if (low >= high)
+        return;
+    int p = quickPartition(a, low, high, counter);
+    quickSortRange(a, low, p - 1, counter);
+    quickSortRange(a, p + 1, high, counter);
+}
+
+template <typename Arr>
+void quickSort(Arr& a, int n, SortCounter* counter = nullptr)
+{
+    quickSortRange(a, 0, n - 1, counter);
+}
+
+struct SortRange
+{
+    int low = 0;
+    int high = -1;
+};
+
+// Returns the largest number of ranges that were waiting on the stack at once.
+template <typename Arr>
+int quickSortIterative(Arr& a, int n, SortCounter* counter = nullptr)
+{
+    if (n < 2)
+        return 0;
+
+    ArrayStack<SortRange> pending;
+    SortRange whole;
+    whole.low = 0;
+    whole.high = n - 1;
+    pending.push(whole);
+    int maxDepth = 1;
+
+    while (!pending.empty())
+    {
+        SortRange r = pending.pop();
+        if (r.low >= r.high)
+            continue;
+
+        int p = quickPartition(a, r.low, r.high, counter);
+        SortRange left;
+        left.low = r.low;
+        left.high = p - 1;
+        SortRange right;
+        right.low = p + 1;
+        right.high = r.high;
+
+        // Push the larger part first, so the smaller part is popped next.
+        if (left.high - left.low > right.high - right.low)
+        {
+            pending.push(left);
+            pending.push(right);
+        }
+        else
+        {
+            pending.push(right);
+            pending.push(left);
+        }
+        if ((int)pending.size() > maxDepth)
+            maxDepth = (int)pending.size();
+    }
+    return maxDepth;
 }
 
 inline int sortLetterIndex(char c)
