@@ -50,6 +50,7 @@ int linearSearchList(const SinglyLinkedList<T>& list, const T& key, ListSearchSt
 }
 
 // The list must be sorted. Returns the 0-based position of key, or -1.
+// GUIDE 2.2: slow / fast pointers find each middle
 template <typename T>
 int binarySearchList(const SinglyLinkedList<T>& list, const T& key, ListSearchStats* stats = nullptr)
 {

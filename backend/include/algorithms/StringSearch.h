@@ -15,6 +15,7 @@ inline char kmpChar(char c, bool ignoreCase)
 
 // lps[i] = length of the longest proper prefix of pattern[0..i]
 // that is also a suffix of it. lps must have room for pattern.length() ints.
+// GUIDE 2.7: LPS table = where to resume after a mismatch
 inline void buildLps(const std::string& pattern, int* lps, bool ignoreCase = false)
 {
     int m = (int)pattern.length();

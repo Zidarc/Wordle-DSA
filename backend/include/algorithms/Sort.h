@@ -39,6 +39,7 @@ void sortSwap(Arr& a, int i, int j, SortCounter* counter)
 // Bubble sort: O(n^2) comparisons, O(n) on already sorted input because a
 // pass with no swap ends the sort early.
 // ---------------------------------------------------------------------------
+// GUIDE 2.3: elementary sorts start here (bubble, selection, comb, insertion)
 template <typename Arr>
 void bubbleSort(Arr& a, int n, SortCounter* counter = nullptr)
 {
@@ -130,6 +131,7 @@ void insertionSort(Arr& a, int n, SortCounter* counter = nullptr)
     }
 }
 
+// GUIDE 2.3 / 3.6: merge step; the leaderboard is sorted with mergeSort
 template <typename Arr, typename T>
 void mergeRange(Arr& a, T* temp, int low, int mid, int high, SortCounter* counter = nullptr)
 {
@@ -197,6 +199,7 @@ void mergeSort(Arr& a, int n, SortCounter* counter = nullptr)
 //
 // Time: O(n log n) average, O(n^2) worst. Not stable.
 // ---------------------------------------------------------------------------
+// GUIDE 2.3: median-of-three pivot + Lomuto partition
 template <typename Arr>
 int quickPartition(Arr& a, int low, int high, SortCounter* counter)
 {
@@ -248,6 +251,7 @@ struct SortRange
 };
 
 // Returns the largest number of ranges that were waiting on the stack at once.
+// GUIDE 2.5: simulation of recursion with ArrayStack
 template <typename Arr>
 int quickSortIterative(Arr& a, int n, SortCounter* counter = nullptr)
 {
@@ -303,6 +307,7 @@ inline int sortLetterIndex(char c)
 
 // LSD radix sort makes no comparisons at all; every placement of a word into
 // the output array is counted as a move (swaps).
+// GUIDE 2.3 / 3.1: sorts the dictionary once at startup
 template <typename Arr>
 void radixSortWords(Arr& a, int n, int length = 5, SortCounter* counter = nullptr)
 {

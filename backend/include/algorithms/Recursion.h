@@ -24,6 +24,7 @@
 // ----- tail recursion -----
 // Counts how many times `letter` appears in word[from..]. The running total
 // travels in `acc`, so nothing is left to do after the recursive call.
+// GUIDE 2.5: one example per recursion type below
 inline int countLetterTail(const std::string& word, char letter, int from = 0, int acc = 0)
 {
     if (from >= static_cast<int>(word.size()))
