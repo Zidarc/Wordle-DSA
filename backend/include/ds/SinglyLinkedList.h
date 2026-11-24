@@ -240,6 +240,36 @@ public:
         return false;
     }
 
+    // Removes every element for which predicate(element) is true, in one
+    // pass over the list (O(n)). Returns how many were removed.
+    template <typename Predicate>
+    std::size_t removeAllIf(Predicate predicate)
+    {
+        std::size_t removed = 0;
+        while (head_ != nullptr && predicate(head_->data))
+        {
+            popFront();
+            ++removed;
+        }
+        if (head_ == nullptr)
+            return removed;
+
+        Node* before = head_;
+        while (before->next != nullptr)
+        {
+            if (predicate(before->next->data))
+            {
+                unlinkAfter(before); // keeps tail_ correct when the last node goes
+                ++removed;
+            }
+            else
+            {
+                before = before->next;
+            }
+        }
+        return removed;
+    }
+
     void clear()
     {
         Node* current = head_;
