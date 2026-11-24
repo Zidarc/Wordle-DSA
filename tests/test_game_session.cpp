@@ -145,6 +145,17 @@ TEST_CASE(gameSessionHardModeEnforcesHintReuse)
     CHECK_EQ(session.attemptsUsed(), 0); // Not consumed!
 }
 
+TEST_CASE(gameSessionScoreSavedFlag)
+{
+    GameSession session("game-1", "CRANE", Difficulty::Normal, 7u);
+    CHECK(!session.scoreSaved());
+    session.markScoreSaved();
+    CHECK(session.scoreSaved());
+
+    GameSession copy = session; // the flag is part of the session's state
+    CHECK(copy.scoreSaved());
+}
+
 int main()
 {
     return tf::runAll("GameSession");

@@ -56,7 +56,10 @@ export default function useGame(method = 'hash') {
     }
   }, [flash]);
 
+  // While a guess is on its way to the server, typing is ignored: the reply
+  // clears the row, so those letters would vanish anyway.
   const addLetter = useCallback((letter) => {
+    if (busy.current) return;
     setGame((g) =>
       g.status !== 'playing' || g.current.length >= WORD_LENGTH
         ? g
@@ -65,6 +68,7 @@ export default function useGame(method = 'hash') {
   }, []);
 
   const removeLetter = useCallback(() => {
+    if (busy.current) return;
     setGame((g) => (g.status !== 'playing' ? g : { ...g, current: g.current.slice(0, -1) }));
   }, []);
 
@@ -133,8 +137,14 @@ export default function useGame(method = 'hash') {
   useEffect(() => {
     const onKey = (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.target instanceof HTMLInputElement) return; // typing a name / search
-      if (e.key === 'Enter') submit();
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return; // typing a name / choosing an option
+      if (e.key === 'Enter') {
+        // A focused button (e.g. "New game" after a click) would also be
+        // clicked by Enter: stop that, Enter only submits the guess.
+        e.preventDefault();
+        submit();
+      }
       else if (e.key === 'Backspace') removeLetter();
       else if (/^[a-zA-Z]$/.test(e.key)) addLetter(e.key);
     };

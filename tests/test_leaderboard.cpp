@@ -47,6 +47,28 @@ TEST_CASE(leaderboardSavesAndLoadsScores)
     cleanTestFile();
 }
 
+TEST_CASE(leaderboardCleansNames)
+{
+    CHECK_EQ(Leaderboard::cleanName("  Ali  "), std::string("Ali"));
+    CHECK_EQ(Leaderboard::cleanName("    "), std::string("Anonymous"));
+    CHECK_EQ(Leaderboard::cleanName(""), std::string("Anonymous"));
+    CHECK_EQ(Leaderboard::cleanName("a|b\nc"), std::string("a b c"));
+    const std::size_t maxLength = Leaderboard::kMaxNameLength; // a copy: GCC 6 cannot bind the member by reference
+    CHECK_EQ(Leaderboard::cleanName("ABCDEFGHIJKLMNOPQRSTUVWXYZ").size(), maxLength);
+    CHECK_EQ(Leaderboard::cleanName("ABCDEFGHIJKLMNOPQRS  XYZ"), std::string("ABCDEFGHIJKLMNOPQRS"));
+}
+
+TEST_CASE(leaderboardStoresCleanedName)
+{
+    cleanTestFile();
+    Leaderboard lb(kTestScoresFile);
+    lb.addScore("   ", 300, "easy", "2026-11-24");
+    SafeArray<LeaderboardEntry> all = lb.loadAll();
+    CHECK_EQ(all.size(), 1u);
+    CHECK_EQ(all[0].name, std::string("Anonymous"));
+    cleanTestFile();
+}
+
 TEST_CASE(leaderboardTopKLimitsToTen)
 {
     cleanTestFile();

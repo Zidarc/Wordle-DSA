@@ -122,6 +122,7 @@ void Server::setupRoutes()
     // GUIDE 3.2: new game route
     http_->Post("/api/game/new", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         if (!picker_)
         {
             res.status = 500;
@@ -165,6 +166,7 @@ void Server::setupRoutes()
     // GUIDE 3.3: guess route -> GameSession::makeGuess
     http_->Post("/api/game/guess", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string gameId, guess, methodName;
         try
         {
@@ -287,6 +289,7 @@ void Server::setupRoutes()
     // POST /api/game/hint
     http_->Post("/api/game/hint", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string gameId;
         try
         {
@@ -331,6 +334,7 @@ void Server::setupRoutes()
     // GET /api/game/history?gameId=...
     http_->Get("/api/game/history", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string gameId = req.get_param_value("gameId");
         GameSession* session = sessions_.find(gameId);
         if (!session)
@@ -356,6 +360,7 @@ void Server::setupRoutes()
     // GET /api/game/replay?gameId=...
     http_->Get("/api/game/replay", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string gameId = req.get_param_value("gameId");
         GameSession* session = sessions_.find(gameId);
         if (!session)
@@ -402,6 +407,7 @@ void Server::setupRoutes()
     // GET /api/leaderboard?search=...
     http_->Get("/api/leaderboard", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string query = req.get_param_value("search");
         SafeArray<LeaderboardEntry> top = leaderboard_.topScores(query);
 
@@ -424,6 +430,7 @@ void Server::setupRoutes()
     // POST /api/leaderboard
     http_->Post("/api/leaderboard", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string gameId, name;
         try
         {
@@ -453,8 +460,22 @@ void Server::setupRoutes()
             return;
         }
 
+        if (session->scoreSaved())
+        {
+            res.status = 409;
+            res.set_content(json{{"error", "Score for this game is already saved"}}.dump(), "application/json");
+            return;
+        }
+
         std::string today = currentDate();
-        leaderboard_.addScore(name, session->score(), toString(session->difficulty()), today);
+        name = Leaderboard::cleanName(name);
+        if (!leaderboard_.addScore(name, session->score(), toString(session->difficulty()), today))
+        {
+            res.status = 500;
+            res.set_content(json{{"error", "Could not write the scores file"}}.dump(), "application/json");
+            return;
+        }
+        session->markScoreSaved();
 
         res.status = 200;
         res.set_content(json{
@@ -469,6 +490,7 @@ void Server::setupRoutes()
     // GET /api/dsa/stats
     http_->Get("/api/dsa/stats", [this](const httplib::Request&, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         DictionaryStats s = dictionary_.stats();
         json reply = {
             {"wordCount", s.wordCount},
@@ -500,6 +522,7 @@ void Server::setupDsaRoutes()
     // and the top suggestions ranked with quick sort.
     http_->Get("/api/game/solver", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string gameId = req.get_param_value("gameId");
         GameSession* session = sessions_.find(gameId);
         if (!session)
@@ -563,6 +586,7 @@ void Server::setupDsaRoutes()
     // comparisons, average time in ns, and time / space complexity.
     http_->Get("/api/dsa/lookup", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::string word = req.get_param_value("word");
         LookupMethod method = LookupMethod::Hash;
         if (req.has_param("method") && !Dictionary::methodFromString(req.get_param_value("method"), method))
@@ -593,6 +617,7 @@ void Server::setupDsaRoutes()
     // The last 10 finished games, most recent first (circular ArrayQueue).
     http_->Get("/api/games/recent", [this](const httplib::Request&, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         json list = json::array();
         for (std::size_t i = recentGames_.size(); i > 0; --i)
         {
@@ -612,6 +637,7 @@ void Server::setupDsaRoutes()
     // Sorting Lab: seven sorts on the same shuffled copy of the dictionary.
     http_->Get("/api/dsa/sort", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::size_t limit = 0;
         if (req.has_param("limit"))
         {
@@ -645,6 +671,7 @@ void Server::setupDsaRoutes()
     // Binary tree properties of the dictionary's AVL tree and the B-tree.
     http_->Get("/api/dsa/trees", [this](const httplib::Request&, httplib::Response& res) {
         setCors(res);
+        std::lock_guard<std::mutex> lock(mutex_);
         TreeShape avl = dictionary_.avlShape();
         const BTree<std::string>& bt = dictionary_.btree();
         json reply = {
