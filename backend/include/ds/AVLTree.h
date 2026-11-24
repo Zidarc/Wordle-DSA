@@ -226,9 +226,9 @@ private:
     // Single right rotation (LL case).
     //
     //       node             left
-    //       /  \             /   \
+    //       /  \             /   \  .
     //     left   C   =>    A    node
-    //     /  \                  /  \
+    //     /  \                  /  \  .
     //    A    B                B    C
     //
     static Node* rotateRight(Node* node)
@@ -245,9 +245,9 @@ private:
     // Single left rotation (RR case).
     //
     //     node              right
-    //     /  \              /   \
+    //     /  \              /   \  .
     //    A   right   =>   node   C
-    //        /  \         /  \
+    //        /  \         /  \  .
     //       B    C       A    B
     //
     static Node* rotateLeft(Node* node)

@@ -24,7 +24,7 @@ Wordle::Wordle(const std::string& secret) : secret_(Dictionary::normalize(secret
     // next, so the tree is balanced (height 3). CRANE -> A C E N R gives
     //
     //          E
-    //        /   \
+    //        /   \  .
     //       C     R
     //      /     /
     //     A     N
