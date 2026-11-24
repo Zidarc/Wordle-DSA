@@ -281,3 +281,99 @@ table.data th.num {
   .board-row { grid-template-columns: repeat(5, 50px); }
   .tile { width: 50px; height: 50px; font-size: 1.4rem; }
 }
+
+/* ---------- keyboard (GUIDE: LetterTracker = array of 26 + jagged rows) ---------- */
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.key-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.key {
+  flex: 1;
+  max-width: 44px;
+  height: 52px;
+  border: none;
+  border-radius: 6px;
+  background: var(--unused);
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.key-wide {
+  max-width: 70px;
+  flex: 1.5;
+  font-size: 0.75rem;
+}
+
+.key-correct { background: var(--correct); }
+.key-present { background: var(--present); color: #1d1300; }
+.key-absent { background: var(--absent); color: var(--muted); }
+
+/* ---------- hints ---------- */
+
+.hint-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.hint-chip {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--correct);
+  font-size: 0.8rem;
+}
+
+/* ---------- side panel ---------- */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tab {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tab.active {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.stack-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.stack-list li {
+  padding: 3px 0;
+}
+
+.stack-list li.top {
+  color: var(--accent);
+}
