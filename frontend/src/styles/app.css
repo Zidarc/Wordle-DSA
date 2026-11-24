@@ -431,3 +431,10 @@ table.stats {
 .panel h2 + .ds-tag + .big-number + .muted {
   margin-top: 0;
 }
+
+/* ---------- leaderboard ---------- */
+
+.search {
+  width: 100%;
+  margin-bottom: 10px;
+}
