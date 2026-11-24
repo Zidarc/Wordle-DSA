@@ -79,7 +79,7 @@ Every sort has the form `xxxSort(arr, n, SortCounter* counter = nullptr)`. `Sort
 |------|------|-------------|-------|-------|
 | **Bubble** | swap adjacent pairs out of order; the largest "bubbles" to the end each pass | O(n²) | O(n²) | stops early if a pass swaps nothing → O(n) on sorted input |
 | **Selection** | find the minimum of the unsorted part, swap it to the front | always n(n−1)/2 | ≤ n−1 | fewest swaps: good when moving is expensive |
-| **Insertion** | take the next element and shift larger ones right until its place is found | O(n²), O(n) if sorted | O(n²) shifts | stable; used by `Wordle` to sort the 5 secret letters and by the leaderboard idea of "insert one new score" |
+| **Insertion** | take the next element and shift larger ones right until its place is found | O(n²), O(n) if sorted | O(n²) shifts | stable; used by `Wordle` to sort the 5 secret letters before building the BST |
 | **Comb** | bubble sort with a gap that starts at n and shrinks ÷1.3 each pass | ~O(n log n) in practice | | moves small values stuck at the end ("turtles") early |
 
 ### Advanced sorts (lab week 7)
