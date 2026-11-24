@@ -335,3 +335,45 @@ table.data th.num {
   background: var(--correct);
   font-size: 0.8rem;
 }
+
+/* ---------- side panel ---------- */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tab {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tab.active {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.stack-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.stack-list li {
+  padding: 3px 0;
+}
+
+.stack-list li.top {
+  color: var(--accent);
+}

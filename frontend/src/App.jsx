@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import Board from './components/Board.jsx';
 import DifficultySelect from './components/DifficultySelect.jsx';
 import HintButton from './components/HintButton.jsx';
+import HistoryPanel from './components/HistoryPanel.jsx';
 import Keyboard from './components/Keyboard.jsx';
+import SidePanel from './components/SidePanel.jsx';
 import useGame from './hooks/useGame.js';
 
 // App layout: top bar (difficulty, new game), the game column on the left,
@@ -58,7 +60,15 @@ export default function App() {
             disabled={game.status !== 'playing'}
           />
         </section>
-        <aside />
+        <SidePanel
+          tabs={[
+            {
+              id: 'history',
+              label: 'History',
+              render: () => <HistoryPanel gameId={game.gameId} version={game.version} />,
+            },
+          ]}
+        />
       </div>
     </div>
   );
