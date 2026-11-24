@@ -80,6 +80,10 @@ public:
     // Applies one guess and its feedback; returns how many words were removed.
     int applyGuess(const std::string& guess, const LetterState* feedback);
 
+    // Applies a revealed hint (letter known at pos); returns how many words
+    // were removed. Same one-pass removeAllIf filter as applyGuess.
+    int applyHint(int pos, char letter);
+
     // Back to the full dictionary, no constraints.
     void reset();
 
