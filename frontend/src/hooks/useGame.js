@@ -133,8 +133,14 @@ export default function useGame(method = 'hash') {
   useEffect(() => {
     const onKey = (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.target instanceof HTMLInputElement) return; // typing a name / search
-      if (e.key === 'Enter') submit();
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return; // typing a name / choosing an option
+      if (e.key === 'Enter') {
+        // A focused button (e.g. "New game" after a click) would also be
+        // clicked by Enter: stop that, Enter only submits the guess.
+        e.preventDefault();
+        submit();
+      }
       else if (e.key === 'Backspace') removeLetter();
       else if (/^[a-zA-Z]$/.test(e.key)) addLetter(e.key);
     };
