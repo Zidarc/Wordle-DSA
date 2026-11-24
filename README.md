@@ -153,9 +153,15 @@ Every structure below is **implemented by the team**. None is replaced by an STL
 | **Doubly linked list** | `DoublyLinkedList<T>` | Game replay: step forward and backward through the guesses |
 | **Circular linked list** | `CircularLinkedList<T>` | Secret-word rotation: shuffled words in a cycle, so no word repeats until all have been used |
 | **Stack** (linked-list based) | `Stack<T>` | Guess history (most recent on top), and the iterative tree traversal |
+| **Stack** (array based) | `ArrayStack<T>` | Explicit stack for iterative quick sort and iterative backtracking (second implementation strategy) |
 | **Queue** (linked-list based) | `Queue<T>` | Hint order: unrevealed letter positions are shuffled into a queue at game start, and each hint dequeues the next one |
+| **Circular queue** (array based) | `ArrayQueue<T>` | Last 10 finished games, as a bounded ring buffer that drops the oldest game when full |
 | **Binary Search Tree** | `BST<T>` | The secret word's letters: O(log n) "is this letter in the word?" |
 | **AVL tree** | `AVLTree<T>` | The dictionary: self-balancing tree with rotations, used for word validation |
+| **B-tree of order 3 (2-3 tree)** | `BTree<T, 3>` | The dictionary again, as the sixth lookup method: 1-2 words per node, all leaves on one level |
+| **Binary tree properties** | `BinaryTreeProperties.h` | Node / leaf counts and full, complete and perfect checks on the BST and AVL tree |
+| **Dynamic 2D array** (5 × 26) | `FrequencyTable` | How often each letter appears at each position among the possible words; ranks suggestions |
+| **Singly linked list** (candidates) | `Solver` | The words still possible after each guess; impossible words are unlinked in one pass |
 | **Hash table** (separate chaining) | `HashTable<K, V>` | The dictionary (O(1) average validation), and active games on the server keyed by `gameId` |
 | **Min-heap** (priority queue) | `MinHeap<T>` | Top-K leaderboard: streams all saved scores and keeps the best 10 |
 
@@ -168,15 +174,20 @@ Every structure below is **implemented by the team**. None is replaced by an STL
 | **Interpolation search** | Dictionary lookup. Each 5-letter word is mapped to a base-26 number, so the sorted words have numeric keys to interpolate on. |
 | **Radix sort** (LSD) | Sorts the dictionary on load. Every word has exactly 5 letters from a 26-letter alphabet, which makes radix sort a perfect fit: O(5 × (n + 26)). |
 | **Merge sort** | Sorts the top-K leaderboard entries extracted from the heap (stable, so equal scores keep their original order) |
+| **Quick sort** (median-of-three; recursive and explicit-stack) | Ranks the solver's suggestions; also in the Sorting Lab |
+| **Bubble, selection, comb sort** | Sorting Lab, with comparison and swap counters |
+| **Linear / binary search on a linked list** | Searching the solver's candidate list (binary search finds each middle with slow / fast pointers) |
+| **Backtracking** | Solver: builds words letter by letter and prunes any prefix that breaks the feedback or starts no dictionary word |
+| **Types of recursion** | Tail, head, tree, indirect and nested recursion examples in `Recursion.h` |
 | **Insertion sort** | Inserts one new score into the already-sorted list shown after a game |
 | **Fisher–Yates shuffle** | Shuffles the secret words and the hint positions |
 | **Polynomial rolling hash** | Hash function for the hash table, with **rehashing** when the load factor exceeds 0.75 |
-| **Recursion** | Binary search, BST and AVL insert/search/destroy, merge sort |
-| **Simulation of recursion** | Iterative in-order traversal of the AVL tree using our own stack, used to check that the tree is sorted |
+| **Recursion** | Binary search, BST and AVL insert/search/destroy, B-tree insert, merge sort, quick sort, backtracking |
+| **Simulation of recursion** | Iterative in-order traversal of the AVL tree, iterative quick sort and iterative backtracking, each with our own stack |
 | **KMP string search** | Searching the leaderboard by part of a player's name |
 | **Two-pass guess evaluation** | Correct green / yellow / gray colouring with repeated letters |
 
-### Five ways to validate one word
+### Six ways to validate one word
 
 The same guess is checked by every method, and the comparison counts are sent to the DSA Insights panel:
 
@@ -187,12 +198,15 @@ Guess "CRANE"
      ├──► Binary search ─────────── O(log n)   e.g.  11 comparisons
      ├──► Interpolation search ──── O(log log n) average, e.g. 4 comparisons
      ├──► AVL tree ──────────────── O(log n)   e.g.  12 comparisons
+     ├──► 2-3 tree (B-tree) ─────── O(log n)   e.g.  15 comparisons, 9 nodes read
      └──► Hash table ────────────── O(1) avg   e.g.   1 comparison
 ```
 
 (The numbers are illustrative. The real ones depend on the word list.)
 
-The **hash table** is the method the game actually relies on. The other four are run alongside it for the comparison.
+The **hash table** is the method the game actually relies on. The other five are run alongside it for the comparison.
+
+The dictionary is inserted into the 2-3 tree in sorted order, and bottom-up splits then leave most nodes holding one word, so on this word list the 2-3 tree is only about one level shorter than the AVL tree. With random insertion order, or a higher order (`BTree<T, 5>`), the difference grows; `test_btree` checks this.
 
 ### Secret word BST
 
@@ -417,7 +431,11 @@ The backend listens on `http://localhost:8080`. The Vite dev server proxies `/ap
 | `GET` | `/api/game/replay?gameId=...` | — | Guesses in order, for forward/back replay (doubly linked list). Only after the game is over. |
 | `GET` | `/api/leaderboard?search=...` | — | Top 10 entries (heap + merge sort), optionally filtered by name (KMP) |
 | `POST` | `/api/leaderboard` | `{ "gameId": "...", "name": "Ali" }` | Saved entry and rank |
-| `GET` | `/api/dsa/stats` | — | Word count, AVL height, hash table size, load factor, longest chain |
+| `GET` | `/api/dsa/stats` | — | Word count, AVL height and leaves, B-tree height and nodes, hash table size, load factor, longest chain |
+| `GET` | `/api/game/solver?gameId=...` | — | Possible words, backtracking statistics (recursive and explicit-stack), ranked suggestions |
+| `GET` | `/api/dsa/sort?limit=...` | — | Sorting Lab: comparisons, swaps and time of seven sorts |
+| `GET` | `/api/dsa/trees` | — | Full / complete / perfect checks and counts for the AVL tree, shape of the 2-3 tree |
+| `GET` | `/api/games/recent` | — | Last 10 finished games (circular queue) |
 
 Example response to a guess:
 
@@ -458,15 +476,21 @@ Wordle-DSA/
 │   │   │   ├── DoublyLinkedList.h
 │   │   │   ├── CircularLinkedList.h
 │   │   │   ├── Stack.h
+│   │   │   ├── ArrayStack.h        # Phase 2: array-based stack
 │   │   │   ├── Queue.h
+│   │   │   ├── ArrayQueue.h        # Phase 2: circular-array queue
 │   │   │   ├── BST.h
 │   │   │   ├── AVLTree.h
+│   │   │   ├── BTree.h             # Phase 2: B-tree / 2-3 tree
+│   │   │   ├── BinaryTreeProperties.h
 │   │   │   ├── HashTable.h
 │   │   │   └── MinHeap.h
 │   │   │
 │   │   ├── algorithms/
 │   │   │   ├── Search.h            # Linear, binary, interpolation
-│   │   │   ├── Sort.h              # Radix, merge, insertion
+│   │   │   ├── Sort.h              # Radix, merge, insertion, bubble, selection, comb, quick
+│   │   │   ├── ListSearch.h        # Linear / binary search on a linked list
+│   │   │   ├── Recursion.h         # Types of recursion
 │   │   │   ├── StringSearch.h      # KMP
 │   │   │   └── Shuffle.h           # Fisher–Yates
 │   │   │
@@ -479,6 +503,10 @@ Wordle-DSA/
 │   │   ├── GameSession.h           # One game: board, tracker, stack, queue, replay
 │   │   ├── Score.h                 # Score calculation
 │   │   ├── Leaderboard.h           # File, heap, merge sort, KMP search
+│   │   ├── SortingLab.h            # Seven sorts side by side
+│   │   ├── FrequencyTable.h        # 5 x 26 letter counts (2D array)
+│   │   ├── Constraints.h           # What the feedback says about the secret word
+│   │   ├── Solver.h                # Candidate list, backtracking, suggestions
 │   │   └── Server.h                # HTTP routes
 │   │
 │   ├── src/
@@ -491,6 +519,10 @@ Wordle-DSA/
 │   │   ├── GameSession.cpp
 │   │   ├── Score.cpp
 │   │   ├── Leaderboard.cpp
+│   │   ├── SortingLab.cpp
+│   │   ├── FrequencyTable.cpp
+│   │   ├── Constraints.cpp
+│   │   ├── Solver.cpp
 │   │   └── Server.cpp
 │   │
 │   └── third_party/
@@ -540,6 +572,14 @@ Wordle-DSA/
 │   ├── test_dictionary.cpp
 │   ├── test_board_tracker.cpp
 │   ├── test_wordle.cpp
+│   ├── test_array_stack_queue.cpp
+│   ├── test_sort_counters.cpp
+│   ├── test_sorting_lab.cpp
+│   ├── test_tree_properties.cpp
+│   ├── test_btree.cpp
+│   ├── test_list_search.cpp
+│   ├── test_solver.cpp
+│   ├── test_recursion.cpp
 │   ├── test_game_session.cpp
 │   ├── test_score.cpp
 │   └── test_leaderboard.cpp
@@ -571,7 +611,7 @@ The generic containers and algorithms in `include/ds/` and `include/algorithms/`
 | Tool | Purpose |
 |------|---------|
 | Git | Version control |
-| Visual Studio 2022 (Desktop development with C++) **or** MinGW-w64 g++ | C++17 compiler |
+| Visual Studio 2022 or newer (Desktop development with C++) **or** MinGW-w64 g++ 8 or newer | C++17 compiler. The server needs `std::thread` and Windows 8+ socket headers, so the old MinGW.org GCC 6.3 can build the tests but not `wordle_server` |
 | CMake 3.16 or newer | Backend build |
 | Node.js 20 LTS or newer (includes npm) | Frontend tooling |
 | VS Code / Dev-C++ | Editors |
@@ -736,6 +776,8 @@ The core game was finished on schedule. Phase 2 maps the project onto the **Data
 
 Each step is merged into `develop` only when every CTest test passes.
 
+**Status (24 Nov 2026):** P1–P9 are merged into `develop` (25 CTest suites passing). Still open: frontend pages for the solver, Sorting Lab and tree data, and `docs/COMPLEXITY_ANALYSIS.md` / `docs/ARCHITECTURE.md`.
+
 ---
 
 ## 17. Testing Requirements
@@ -772,7 +814,11 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 
 **Algorithms**
 - Linear, binary and interpolation search: first, middle, last, missing; all three agree
-- Radix, merge and insertion sort: empty, one element, already sorted, reversed, duplicates
+- Radix, merge, insertion, bubble, selection, comb and quick sort, and measuring them
+- Backtracking with pruning, and the types of recursion
+- Searching linked lists, and why binary search needs random access
+- 2-3 trees / B-trees, and binary tree properties (full, complete, perfect)
+- Array-based and linked-list-based stacks and queues: empty, one element, already sorted, reversed, duplicates
 - KMP: match at the start / middle / end, no match, overlapping matches
 
 **Dictionary and WordPicker**
@@ -796,6 +842,16 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 - Replay list walks forward and backward
 - Each difficulty multiplier; hint penalty; loss gives 0; never below 0
 - Leaderboard save and reload; missing `scores.txt`; top 10 sorted highest first; equal scores; name search
+
+**Phase 2**
+- Array stack: LIFO, growth by doubling, deep copy. Circular queue: wrap-around, growth keeps order, bounded mode drops the oldest
+- Bubble, selection, comb, quick sort (both versions): empty, sorted, reversed, duplicates; counters match the theory (selection n(n-1)/2 comparisons, radix 0)
+- Sorting Lab: all seven sorts give the dictionary's order
+- Tree properties: full-not-complete, complete-not-full, perfect, a gap on the last level; AVL invariant on 2000 inserts
+- 2-3 tree: root split, all leaves on one level after sorted insert, higher order gives a shorter tree, deep copy
+- Linked list search: binary and linear agree for every list size; binary uses O(log n) comparisons but O(n) pointer moves
+- Solver: constraints from repeated letters, backtracking (both versions) equals the filtered list, pruning, ranking
+- Recursion types: tail, head, tree, indirect, nested
 
 ---
 
@@ -824,6 +880,16 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 | Sort top-K | Merge sort | O(K log K) |
 | Search leaderboard by name | KMP | O(m × (name length + p)) |
 | Find active game | Hash table | O(1) average |
+| Validate word | 2-3 tree (B-tree, order 3) | O(log n) |
+| Push / pop | Array stack | O(1) amortised |
+| Enqueue / dequeue | Circular array queue | O(1) amortised |
+| Filter possible words | Singly linked list, one pass | O(n × L) |
+| Binary search on a linked list | Slow / fast pointers | O(log n) comparisons, O(n) pointer moves |
+| Generate possible words | Backtracking with pruning | O(26 × L × prefixes kept × log n), far below 26^L |
+| Rank suggestions | Frequency table + quick sort | O(c × L + c log c) average, c = possible words |
+| Bubble / selection / insertion / comb sort | Sorting Lab | O(n²) (comb sort much faster in practice) |
+| Quick sort | Sorting Lab, suggestions | O(n log n) average, O(n²) worst |
+| Full / complete / perfect check | Recursion / level-order with Queue | O(n) |
 
 The full analysis will be in `docs/COMPLEXITY_ANALYSIS.md`.
 
