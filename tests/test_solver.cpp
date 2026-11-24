@@ -169,6 +169,24 @@ TEST_CASE(solverNarrowsDownAndKeepsTheSecret)
     CHECK(s.remaining() < 10u);
 }
 
+TEST_CASE(solverUsesRevealedHints)
+{
+    Dictionary d = realDictionary();
+    Solver s(d);
+    Wordle w("PUNCH");
+    GuessFeedback fb = w.evaluate("BUNCH");
+    s.applyGuess("BUNCH", fb.states);
+    CHECK(s.isCandidate("PUNCH"));
+    std::size_t before = s.remaining();
+
+    int removed = s.applyHint(0, 'p'); // lower-case is accepted
+    CHECK(removed >= 0);
+    CHECK_EQ(s.remaining() + static_cast<std::size_t>(removed), before);
+    CHECK(s.isCandidate("PUNCH"));
+    CHECK(!s.isCandidate("BUNCH"));
+    CHECK(sameWords(s.generateCandidates(), s.candidates()));
+}
+
 TEST_CASE(backtrackingMatchesCandidateList)
 {
     Dictionary d = realDictionary();
