@@ -14,6 +14,7 @@
 #include "GameSession.h"
 #include "Leaderboard.h"
 #include "WordPicker.h"
+#include "ds/ArrayQueue.h"
 #include "ds/HashTable.h"
 
 #include <memory>
@@ -23,6 +24,17 @@ namespace httplib
 {
 class Server;
 }
+
+// One finished game, kept in the recent-games ring buffer.
+struct RecentGame
+{
+    std::string gameId;
+    std::string secretWord;
+    std::string difficulty;
+    std::string result; // "won" / "lost"
+    int attempts = 0;
+    int score = 0;
+};
 
 class Server
 {
@@ -48,7 +60,13 @@ private:
     std::unique_ptr<httplib::Server> http_;
     int gameCounter_ = 0;
 
+    // The last kRecentGames finished games, oldest first. A bounded circular
+    // ArrayQueue: when it is full, the oldest game is dropped (O(1)).
+    static constexpr std::size_t kRecentGames = 10;
+    ArrayQueue<RecentGame> recentGames_{kRecentGames, true};
+
     void setupRoutes();
+    void setupDsaRoutes(); // solver, Sorting Lab and tree routes
     std::string generateGameId();
 };
 
