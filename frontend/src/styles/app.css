@@ -419,3 +419,15 @@ table.lookup tr.used td {
 table.stats {
   margin-top: 12px;
 }
+
+/* ---------- solver ---------- */
+
+.big-number {
+  margin: 4px 0 0;
+  font-size: 2.4rem;
+  color: var(--accent);
+}
+
+.panel h2 + .ds-tag + .big-number + .muted {
+  margin-top: 0;
+}

@@ -7,6 +7,7 @@ import HistoryPanel from './components/HistoryPanel.jsx';
 import Keyboard from './components/Keyboard.jsx';
 import MethodSelect from './components/MethodSelect.jsx';
 import SidePanel from './components/SidePanel.jsx';
+import SolverPanel from './components/SolverPanel.jsx';
 import useGame from './hooks/useGame.js';
 
 // App layout: top bar (difficulty, new game), the game column on the left,
@@ -70,6 +71,11 @@ export default function App() {
               id: 'insights',
               label: 'DSA Insights',
               render: () => <DsaInsights lookup={game.lookup} method={method} version={game.version} />,
+            },
+            {
+              id: 'solver',
+              label: 'Solver',
+              render: () => <SolverPanel gameId={game.gameId} version={game.version} />,
             },
             {
               id: 'history',
