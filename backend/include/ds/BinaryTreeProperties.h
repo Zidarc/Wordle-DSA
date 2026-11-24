@@ -12,9 +12,9 @@
 //
 //              full, not complete       complete, not full      perfect
 //                    A                         A                   A
-//                   / \                       / \                 /   .
+//                   / \                       / \                 / \    (diagram)
 //                  B   C                     B   C               B   C
-//                     / \                   /                   / \ /   .
+//                     / \                   /                   / \ / \  (diagram)
 //                    D   E                 D                   D  E F  G
 //
 // Complexity: every function visits each node once, O(n).
