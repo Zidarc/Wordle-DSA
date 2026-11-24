@@ -3,6 +3,7 @@
 #include "algorithms/Search.h"
 #include "algorithms/Sort.h"
 
+#include <chrono>
 #include <fstream>
 #include <stdexcept>
 
@@ -109,6 +110,28 @@ bool Dictionary::isInDictionary(const std::string& word) const
     return table_.contains(w);
 }
 
+// Runs `lookup` once to record its answer and comparison count, then
+// kTimingRepeats more times to measure the average time of one call.
+// TIP: this is where the "ns" numbers in the DSA Insights panel come from.
+template <typename Lookup>
+static LookupResult timedLookup(Lookup lookup, int repeats)
+{
+    LookupResult result;
+    result.found = lookup(result.comparisons);
+
+    int ignored = 0;
+    volatile bool sink = false; // volatile: the loop cannot be optimised away
+    auto start = std::chrono::steady_clock::now();
+    for (int i = 0; i < repeats; ++i)
+        sink = lookup(ignored);
+    auto end = std::chrono::steady_clock::now();
+    (void)sink;
+
+    long long total = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    result.nanoseconds = total / repeats;
+    return result;
+}
+
 LookupStats Dictionary::lookupAll(const std::string& word) const
 {
     LookupStats stats;
@@ -118,16 +141,22 @@ LookupStats Dictionary::lookupAll(const std::string& word) const
 
     const int n = static_cast<int>(sortedWords_.size());
     const std::string& w = stats.word;
+    const int r = kTimingRepeats;
 
-    stats.linear.found =
-        linearSearch(sortedWords_, n, w, &stats.linear.comparisons) != -1;
-    stats.binary.found =
-        binarySearch(sortedWords_, 0, n - 1, w, &stats.binary.comparisons) != -1;
-    stats.interpolation.found =
-        interpolationSearch(sortedWords_, n, w, &stats.interpolation.comparisons) != -1;
-    stats.avl.found = tree_.contains(w, stats.avl.comparisons);
-    stats.btree.found = btree_.search(w, stats.btree.comparisons, stats.btreeNodesVisited);
-    stats.hash.found = table_.contains(w, stats.hash.comparisons);
+    stats.linear = timedLookup([&](int& c) { return linearSearch(sortedWords_, n, w, &c) != -1; }, r);
+    stats.binary = timedLookup([&](int& c) { return binarySearch(sortedWords_, 0, n - 1, w, &c) != -1; }, r);
+    stats.interpolation =
+        timedLookup([&](int& c) { return interpolationSearch(sortedWords_, n, w, &c) != -1; }, r);
+    stats.avl = timedLookup([&](int& c) { return tree_.contains(w, c); }, r);
+    stats.btree = timedLookup(
+        [&](int& c) {
+            int nodes = 0;
+            bool found = btree_.search(w, c, nodes);
+            stats.btreeNodesVisited = nodes;
+            return found;
+        },
+        r);
+    stats.hash = timedLookup([&](int& c) { return table_.contains(w, c); }, r);
 
     return stats;
 }

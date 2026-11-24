@@ -28,6 +28,7 @@ struct LookupResult
 {
     bool found = false;
     int comparisons = 0;
+    long long nanoseconds = 0; // average time of one lookup (see Dictionary::kTimingRepeats)
 };
 
 // The same word checked by all six methods.
@@ -67,6 +68,11 @@ class Dictionary
 {
 public:
     static constexpr int kWordLength = 5;
+
+    // A single lookup takes well under a microsecond, below what the clock
+    // can measure reliably. Each method is therefore run this many times in
+    // a row and the total is divided by it.
+    static constexpr int kTimingRepeats = 200;
 
     Dictionary() = default;
 
