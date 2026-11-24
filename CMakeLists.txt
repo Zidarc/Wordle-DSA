@@ -40,6 +40,7 @@ add_library(wordle_core STATIC
     backend/src/SortingLab.cpp
     backend/src/FrequencyTable.cpp
     backend/src/Constraints.cpp
+    backend/src/Solver.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
 
