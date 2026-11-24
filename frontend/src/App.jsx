@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import Board from './components/Board.jsx';
 import DifficultySelect from './components/DifficultySelect.jsx';
 import DsaInsights from './components/DsaInsights.jsx';
+import GameOverModal from './components/GameOverModal.jsx';
 import HintButton from './components/HintButton.jsx';
 import HistoryPanel from './components/HistoryPanel.jsx';
 import Keyboard from './components/Keyboard.jsx';
 import LabPanel from './components/LabPanel.jsx';
+import Leaderboard from './components/Leaderboard.jsx';
 import MethodSelect from './components/MethodSelect.jsx';
 import SidePanel from './components/SidePanel.jsx';
 import SolverPanel from './components/SolverPanel.jsx';
@@ -18,6 +20,9 @@ export default function App() {
   const [method, setMethod] = useState('hash');
   const { game, start, addLetter, removeLetter, submit, requestHint } = useGame(method);
   const [difficulty, setDifficulty] = useState('normal');
+  const [closedFor, setClosedFor] = useState(null); // gameId whose game-over dialog was closed
+  const [savedTick, setSavedTick] = useState(0); // refreshes the leaderboard after a save
+  const gameOver = game.status === 'won' || game.status === 'lost';
   const started = useRef(false);
 
   // Start one game on first load (the ref stops StrictMode's double effect).
@@ -79,6 +84,11 @@ export default function App() {
               render: () => <SolverPanel gameId={game.gameId} version={game.version} />,
             },
             {
+              id: 'leaderboard',
+              label: 'Leaderboard',
+              render: () => <Leaderboard version={game.version + savedTick} />,
+            },
+            {
               id: 'lab',
               label: 'DSA Lab',
               render: () => <LabPanel version={game.version} />,
@@ -91,6 +101,14 @@ export default function App() {
           ]}
         />
       </div>
+
+      {gameOver && closedFor !== game.gameId && (
+        <GameOverModal
+          game={game}
+          onClose={() => setClosedFor(game.gameId)}
+          onSaved={() => setSavedTick((t) => t + 1)}
+        />
+      )}
     </div>
   );
 }
