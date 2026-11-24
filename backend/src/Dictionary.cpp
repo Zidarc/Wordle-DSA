@@ -9,7 +9,8 @@
 bool LookupStats::allAgree() const
 {
     return linear.found == binary.found && binary.found == interpolation.found &&
-           interpolation.found == avl.found && avl.found == hash.found;
+           interpolation.found == avl.found && avl.found == btree.found &&
+           btree.found == hash.found;
 }
 
 // ---------------------------------------------------------------------------
@@ -47,7 +48,10 @@ std::size_t Dictionary::loadFromStream(std::istream& input)
     radixSortWords(sortedWords_, static_cast<int>(sortedWords_.size()), kWordLength);
 
     for (const std::string& word : sortedWords_)
+    {
         tree_.insert(word);
+        btree_.insert(word);
+    }
 
     return sortedWords_.size();
 }
@@ -56,6 +60,7 @@ void Dictionary::clear()
 {
     sortedWords_.clear();
     tree_.clear();
+    btree_.clear();
     table_.clear();
 }
 
@@ -121,6 +126,7 @@ LookupStats Dictionary::lookupAll(const std::string& word) const
     stats.interpolation.found =
         interpolationSearch(sortedWords_, n, w, &stats.interpolation.comparisons) != -1;
     stats.avl.found = tree_.contains(w, stats.avl.comparisons);
+    stats.btree.found = btree_.search(w, stats.btree.comparisons, stats.btreeNodesVisited);
     stats.hash.found = table_.contains(w, stats.hash.comparisons);
 
     return stats;
@@ -135,6 +141,10 @@ DictionaryStats Dictionary::stats() const
     DictionaryStats s;
     s.wordCount = sortedWords_.size();
     s.avlHeight = tree_.height();
+    s.avlLeaves = tree_.leafCount();
+    s.avlBalanced = tree_.isBalanced();
+    s.btreeHeight = btree_.height();
+    s.btreeNodes = btree_.nodeCount();
     s.hashSize = table_.size();
     s.hashBuckets = table_.bucketCount();
     s.hashUsedBuckets = table_.usedBuckets();
@@ -148,6 +158,22 @@ bool Dictionary::treeMatchesSortedWords() const
 {
     SafeArray<std::string> inOrder;
     tree_.toSortedArray(inOrder);
+    if (inOrder.size() != sortedWords_.size())
+        return false;
+    for (std::size_t i = 0; i < inOrder.size(); ++i)
+    {
+        if (inOrder[i] != sortedWords_[i])
+            return false;
+    }
+    return true;
+}
+
+bool Dictionary::btreeMatchesSortedWords() const
+{
+    if (!btree_.isValid())
+        return false;
+    SafeArray<std::string> inOrder;
+    btree_.toSortedArray(inOrder);
     if (inOrder.size() != sortedWords_.size())
         return false;
     for (std::size_t i = 0; i < inOrder.size(); ++i)

@@ -8,12 +8,14 @@
 //
 //   sortedWords_  SafeArray, sorted   -> linear, binary, interpolation search
 //   tree_         AVL tree            -> O(log n) lookup
+//   btree_        B-tree, order 3     -> O(log n) lookup with 1-2 words per node
 //   table_        hash table          -> O(1) average lookup (the one the game uses)
 //
-// lookupAll() runs the same guess through all five methods and reports how
+// lookupAll() runs the same guess through all six methods and reports how
 // many comparisons each one needed, for the DSA Insights panel.
 
 #include "ds/AVLTree.h"
+#include "ds/BTree.h"
 #include "ds/HashTable.h"
 #include "ds/SafeArray.h"
 
@@ -28,7 +30,7 @@ struct LookupResult
     int comparisons = 0;
 };
 
-// The same word checked by all five methods.
+// The same word checked by all six methods.
 struct LookupStats
 {
     std::string word; // normalised (upper-case) form of the input
@@ -36,9 +38,11 @@ struct LookupStats
     LookupResult binary;
     LookupResult interpolation;
     LookupResult avl;
+    LookupResult btree;
     LookupResult hash;
+    int btreeNodesVisited = 0; // nodes read by the B-tree lookup (each holds 1-2 words)
 
-    // True when all five methods agree (they always should).
+    // True when all six methods agree (they always should).
     bool allAgree() const;
 };
 
@@ -47,6 +51,10 @@ struct DictionaryStats
 {
     std::size_t wordCount = 0;
     int avlHeight = 0;
+    std::size_t avlLeaves = 0;
+    bool avlBalanced = true;
+    int btreeHeight = 0;
+    std::size_t btreeNodes = 0;
     std::size_t hashSize = 0;
     std::size_t hashBuckets = 0;
     std::size_t hashUsedBuckets = 0;
@@ -79,7 +87,7 @@ public:
     // The check the game relies on: a hash table lookup. Case-insensitive.
     bool isInDictionary(const std::string& word) const;
 
-    // Runs all five lookup methods on the same word and counts their comparisons.
+    // Runs all six lookup methods on the same word and counts their comparisons.
     LookupStats lookupAll(const std::string& word) const;
 
     DictionaryStats stats() const;
@@ -94,9 +102,18 @@ public:
     // true if it returns exactly the sorted array.
     bool treeMatchesSortedWords() const;
 
+    // Same check for the B-tree (recursive in-order walk), plus its own rules.
+    bool btreeMatchesSortedWords() const;
+
+    // Shape of the dictionary's AVL tree (full / complete / leaves ...).
+    TreeShape avlShape() const { return tree_.shape(); }
+
+    const BTree<std::string>& btree() const { return btree_; }
+
 private:
     SafeArray<std::string> sortedWords_;
     AVLTree<std::string> tree_;
+    BTree<std::string> btree_;
     HashTable<std::string, bool> table_;
 
     void clear();

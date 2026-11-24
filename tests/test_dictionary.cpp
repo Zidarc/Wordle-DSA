@@ -143,7 +143,7 @@ TEST_CASE(dictionaryLookupIsCaseInsensitive)
 // Five lookup methods
 // ===========================================================================
 
-TEST_CASE(dictionaryAllFiveMethodsAgreeOnEveryWord)
+TEST_CASE(dictionaryAllSixMethodsAgreeOnEveryWord)
 {
     Dictionary dictionary = realDictionary();
     for (const std::string& word : dictionary.sortedWords())
@@ -151,10 +151,11 @@ TEST_CASE(dictionaryAllFiveMethodsAgreeOnEveryWord)
         LookupStats stats = dictionary.lookupAll(word);
         CHECK(stats.allAgree());
         CHECK(stats.hash.found);
+        CHECK(stats.btree.found);
     }
 }
 
-TEST_CASE(dictionaryAllFiveMethodsAgreeOnMissingWords)
+TEST_CASE(dictionaryAllSixMethodsAgreeOnMissingWords)
 {
     Dictionary dictionary = realDictionary();
     const char* missing[] = {"AAAAA", "ZZZZZ", "CRANK", "QWERT", "MMMMM", "BBBBB"};
@@ -178,6 +179,24 @@ TEST_CASE(dictionaryLookupCountsComparisons)
     CHECK(stats.avl.comparisons >= 1);
     CHECK(stats.hash.comparisons >= 1);
     CHECK(stats.hash.comparisons <= static_cast<int>(dictionary.stats().hashLongestChain));
+    CHECK(stats.btree.found);
+    CHECK(stats.btreeNodesVisited <= dictionary.stats().btreeHeight);
+}
+
+TEST_CASE(dictionaryBTreeMatchesSortedArray)
+{
+    CHECK(smallDictionary().btreeMatchesSortedWords());
+    CHECK(realDictionary().btreeMatchesSortedWords());
+}
+
+TEST_CASE(dictionaryBTreeIsShorterThanAvl)
+{
+    DictionaryStats s = realDictionary().stats();
+    CHECK(s.btreeHeight >= 1);
+    CHECK(s.btreeHeight < s.avlHeight);
+    CHECK(s.btreeNodes < s.wordCount); // 1-2 words per node
+    CHECK(s.avlBalanced);
+    CHECK(s.avlLeaves > 0u);
 }
 
 TEST_CASE(dictionaryLookupOfMalformedWordFindsNothing)
