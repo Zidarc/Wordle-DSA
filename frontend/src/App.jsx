@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import Board from './components/Board.jsx';
+import Keyboard from './components/Keyboard.jsx';
 import useGame from './hooks/useGame.js';
 
 // App layout: top bar (difficulty, new game), the game column on the left,
 // and the DSA side panels on the right.
 // TIP: all game state is in hooks/useGame.js; all fetches in api/client.js.
 export default function App() {
-  const { game, start, submit } = useGame();
+  const { game, start, addLetter, removeLetter, submit } = useGame();
   const [difficulty, setDifficulty] = useState('normal');
   const started = useRef(false);
 
@@ -45,9 +46,13 @@ export default function App() {
             maxAttempts={game.maxAttempts}
             shake={game.shake}
           />
-          <button className="btn" onClick={submit} disabled={game.status !== 'playing'}>
-            Enter
-          </button>
+          <Keyboard
+            letterStatus={game.letterStatus}
+            onLetter={addLetter}
+            onEnter={submit}
+            onBackspace={removeLetter}
+            disabled={game.status !== 'playing'}
+          />
         </section>
         <aside />
       </div>
