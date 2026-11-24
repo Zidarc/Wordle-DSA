@@ -39,6 +39,25 @@ TEST_CASE(gameSessionRejectsNotInWordList)
     CHECK_EQ(session.attemptsUsed(), 0); // Attempt not consumed
 }
 
+TEST_CASE(gameSessionUsesTheChosenLookupMethod)
+{
+    Dictionary dict = makeDictionary();
+    const LookupMethod methods[] = {LookupMethod::Linear, LookupMethod::Binary,
+                                    LookupMethod::Interpolation, LookupMethod::Avl,
+                                    LookupMethod::BTree, LookupMethod::Hash};
+    for (LookupMethod m : methods)
+    {
+        GameSession session("game-m", "CRANE", Difficulty::Easy);
+        GuessResult bad = session.makeGuess("zzzzz", dict, m);
+        CHECK(!bad.accepted);
+        CHECK(bad.methodUsed == m);
+        GuessResult good = session.makeGuess("slate", dict, m);
+        CHECK(good.accepted);
+        CHECK(good.lookupStats.get(m).found);
+        CHECK(good.lookupStats.get(m).comparisons >= 1);
+    }
+}
+
 TEST_CASE(gameSessionWinEvaluation)
 {
     Dictionary dict = makeDictionary();

@@ -183,6 +183,41 @@ TEST_CASE(dictionaryLookupCountsComparisons)
     CHECK(stats.btreeNodesVisited <= dictionary.stats().btreeHeight);
 }
 
+TEST_CASE(dictionaryLookupWithEachMethodGivesSameAnswer)
+{
+    Dictionary dictionary = realDictionary();
+    for (int i = 0; i < Dictionary::kMethodCount; ++i)
+    {
+        LookupMethod m = Dictionary::methodInfo(i).method;
+        CHECK(dictionary.lookupWith("CRANE", m).found);
+        CHECK(!dictionary.lookupWith("QQQQQ", m).found);
+    }
+}
+
+TEST_CASE(dictionaryLookupsAreTimed)
+{
+    Dictionary dictionary = realDictionary();
+    LookupStats stats = dictionary.lookupAll("ZEBRA");
+    CHECK(stats.linear.nanoseconds > 0);
+    CHECK(stats.hash.nanoseconds >= 0);
+    // Scanning ~700 words is slower than one hash probe.
+    CHECK(stats.linear.nanoseconds > stats.hash.nanoseconds);
+}
+
+TEST_CASE(dictionaryMethodNamesAndComplexity)
+{
+    LookupMethod m = LookupMethod::Hash;
+    CHECK(Dictionary::methodFromString("BTree", m));
+    CHECK(m == LookupMethod::BTree);
+    CHECK(Dictionary::methodFromString("linear", m));
+    CHECK(m == LookupMethod::Linear);
+    CHECK(!Dictionary::methodFromString("bogus", m));
+    CHECK(m == LookupMethod::Linear); // unchanged
+    CHECK_EQ(std::string(Dictionary::methodInfo(LookupMethod::Binary).timeAvg), std::string("O(log n)"));
+    CHECK_EQ(std::string(Dictionary::methodInfo(LookupMethod::Hash).key), std::string("hash"));
+    CHECK_THROWS(Dictionary::methodInfo(6), std::out_of_range);
+}
+
 TEST_CASE(dictionaryBTreeMatchesSortedArray)
 {
     CHECK(smallDictionary().btreeMatchesSortedWords());
