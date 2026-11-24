@@ -18,6 +18,7 @@
 #include "ds/HashTable.h"
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace httplib
@@ -59,6 +60,12 @@ private:
     HashTable<std::string, GameSession> sessions_;
     std::unique_ptr<httplib::Server> http_;
     int gameCounter_ = 0;
+
+    // cpp-httplib answers requests on a thread pool, so two requests can run
+    // at the same time. Every route locks this first: the session hash table,
+    // the recent-games queue and the scores file are not thread-safe (an
+    // insert can rehash the table while another request is reading it).
+    std::mutex mutex_;
 
     // The last kRecentGames finished games, oldest first. A bounded circular
     // ArrayQueue: when it is full, the oldest game is dropped (O(1)).
