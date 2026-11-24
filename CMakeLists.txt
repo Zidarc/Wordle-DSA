@@ -38,6 +38,7 @@ add_library(wordle_core STATIC
     backend/src/GameSession.cpp
     backend/src/Leaderboard.cpp
     backend/src/SortingLab.cpp
+    backend/src/FrequencyTable.cpp
 )
 target_link_libraries(wordle_core PUBLIC wordle_ds)
 
