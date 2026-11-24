@@ -431,7 +431,11 @@ The backend listens on `http://localhost:8080`. The Vite dev server proxies `/ap
 | `GET` | `/api/game/replay?gameId=...` | — | Guesses in order, for forward/back replay (doubly linked list). Only after the game is over. |
 | `GET` | `/api/leaderboard?search=...` | — | Top 10 entries (heap + merge sort), optionally filtered by name (KMP) |
 | `POST` | `/api/leaderboard` | `{ "gameId": "...", "name": "Ali" }` | Saved entry and rank |
-| `GET` | `/api/dsa/stats` | — | Word count, AVL height, hash table size, load factor, longest chain |
+| `GET` | `/api/dsa/stats` | — | Word count, AVL height and leaves, B-tree height and nodes, hash table size, load factor, longest chain |
+| `GET` | `/api/game/solver?gameId=...` | — | Possible words, backtracking statistics (recursive and explicit-stack), ranked suggestions |
+| `GET` | `/api/dsa/sort?limit=...` | — | Sorting Lab: comparisons, swaps and time of seven sorts |
+| `GET` | `/api/dsa/trees` | — | Full / complete / perfect checks and counts for the AVL tree, shape of the 2-3 tree |
+| `GET` | `/api/games/recent` | — | Last 10 finished games (circular queue) |
 
 Example response to a guess:
 
@@ -786,7 +790,11 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 
 **Algorithms**
 - Linear, binary and interpolation search: first, middle, last, missing; all three agree
-- Radix, merge and insertion sort: empty, one element, already sorted, reversed, duplicates
+- Radix, merge, insertion, bubble, selection, comb and quick sort, and measuring them
+- Backtracking with pruning, and the types of recursion
+- Searching linked lists, and why binary search needs random access
+- 2-3 trees / B-trees, and binary tree properties (full, complete, perfect)
+- Array-based and linked-list-based stacks and queues: empty, one element, already sorted, reversed, duplicates
 - KMP: match at the start / middle / end, no match, overlapping matches
 
 **Dictionary and WordPicker**
@@ -838,6 +846,16 @@ Every backend component has its own test file in `tests/`, and the tests run thr
 | Sort top-K | Merge sort | O(K log K) |
 | Search leaderboard by name | KMP | O(m × (name length + p)) |
 | Find active game | Hash table | O(1) average |
+| Validate word | 2-3 tree (B-tree, order 3) | O(log n) |
+| Push / pop | Array stack | O(1) amortised |
+| Enqueue / dequeue | Circular array queue | O(1) amortised |
+| Filter possible words | Singly linked list, one pass | O(n × L) |
+| Binary search on a linked list | Slow / fast pointers | O(log n) comparisons, O(n) pointer moves |
+| Generate possible words | Backtracking with pruning | O(26 × L × prefixes kept × log n), far below 26^L |
+| Rank suggestions | Frequency table + quick sort | O(c × L + c log c) average, c = possible words |
+| Bubble / selection / insertion / comb sort | Sorting Lab | O(n²) (comb sort much faster in practice) |
+| Quick sort | Sorting Lab, suggestions | O(n log n) average, O(n²) worst |
+| Full / complete / perfect check | Recursion / level-order with Queue | O(n) |
 
 The full analysis will be in `docs/COMPLEXITY_ANALYSIS.md`.
 
