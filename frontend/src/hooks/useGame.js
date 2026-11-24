@@ -21,7 +21,7 @@ const initialState = {
   letterStatus: {}, // { A: 'correct', ... } from the server's LetterTracker
   hints: [], // [{ position, letter }]
   hintsUsed: 0,
-  lookup: null, // lookupStats of the last word sent (even a rejected one)
+  lookup: null, // { word, found, methods } for the last word sent (even a rejected one)
   possibleWords: null,
   message: '',
   error: false,
@@ -29,7 +29,8 @@ const initialState = {
   version: 0, // bumped after every accepted change, so panels can refresh
 };
 
-export default function useGame() {
+// method: lookup used to validate guesses (see components/MethodSelect.jsx)
+export default function useGame(method = 'hash') {
   const [game, setGame] = useState(initialState);
   const busy = useRef(false);
 
@@ -77,7 +78,7 @@ export default function useGame() {
 
     busy.current = true;
     try {
-      const res = await api.sendGuess(g.gameId, g.current);
+      const res = await api.sendGuess(g.gameId, g.current, method);
       setGame((prev) => ({
         ...prev,
         rows: [...prev.rows, { guess: res.guess, feedback: res.feedback }],
@@ -86,7 +87,7 @@ export default function useGame() {
         score: res.score,
         secretWord: res.secretWord,
         letterStatus: res.letterStatus ?? prev.letterStatus,
-        lookup: { ...res.lookupStats, word: res.guess, found: true, btreeNodes: res.btreeNodesVisited },
+        lookup: { word: res.guess, found: true, methods: res.lookupMethods },
         possibleWords: res.possibleWords,
         message:
           res.status === 'won'
@@ -99,16 +100,17 @@ export default function useGame() {
       }));
     } catch (e) {
       // Rejected guesses still carry lookupStats: show how each method missed.
-      const stats = e.data?.lookupStats;
       setGame((prev) => ({
         ...prev,
-        lookup: stats ? { ...stats, word: prev.current, found: false, btreeNodes: e.data.btreeNodesVisited } : prev.lookup,
+        lookup: e.data?.lookupMethods
+          ? { word: prev.current, found: false, methods: e.data.lookupMethods }
+          : prev.lookup,
       }));
       flash(e.message, true, true);
     } finally {
       busy.current = false;
     }
-  }, [game, flash]);
+  }, [game, flash, method]);
 
   const requestHint = useCallback(async () => {
     if (game.status !== 'playing') return;

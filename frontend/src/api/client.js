@@ -42,7 +42,8 @@ const q = encodeURIComponent;
 
 // ----- game (GameSession on the server) -----
 export const newGame = (difficulty) => post('/api/game/new', { difficulty });
-export const sendGuess = (gameId, guess) => post('/api/game/guess', { gameId, guess });
+export const sendGuess = (gameId, guess, method = 'hash') =>
+  post('/api/game/guess', { gameId, guess, method });
 export const getHint = (gameId) => post('/api/game/hint', { gameId });
 export const getHistory = (gameId) => request(`/api/game/history?gameId=${q(gameId)}`);
 export const getReplay = (gameId) => request(`/api/game/replay?gameId=${q(gameId)}`);
@@ -56,6 +57,8 @@ export const saveScore = (gameId, name) => post('/api/leaderboard', { gameId, na
 
 // ----- DSA panels -----
 export const getDsaStats = () => request('/api/dsa/stats');
+export const lookupWord = (word, method = 'hash') =>
+  request(`/api/dsa/lookup?word=${q(word)}&method=${q(method)}`);
 export const getTreeStats = () => request('/api/dsa/trees');
 export const runSortingLab = (limit = 0) =>
   request(`/api/dsa/sort${limit ? `?limit=${limit}` : ''}`);
