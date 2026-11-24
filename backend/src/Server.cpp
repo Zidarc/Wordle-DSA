@@ -211,6 +211,19 @@ void Server::setupRoutes()
         }
         reply["letterStatus"] = letterStatus;
 
+        // This guess ended the game: remember it in the recent-games buffer.
+        if (session->isGameOver())
+        {
+            RecentGame g;
+            g.gameId = session->id();
+            g.secretWord = session->secretWord();
+            g.difficulty = toString(session->difficulty());
+            g.result = toString(session->status());
+            g.attempts = session->attemptsUsed();
+            g.score = session->score();
+            recentGames_.enqueue(g);
+        }
+
         // How many dictionary words still fit all the feedback (solver list)
         Solver solver(dictionary_);
         replayInto(solver, *session);
@@ -497,6 +510,25 @@ void Server::setupDsaRoutes()
         };
         res.status = 200;
         res.set_content(reply.dump(), "application/json");
+    });
+
+    // GET /api/games/recent
+    // The last 10 finished games, most recent first (circular ArrayQueue).
+    http_->Get("/api/games/recent", [this](const httplib::Request&, httplib::Response& res) {
+        setCors(res);
+        json list = json::array();
+        for (std::size_t i = recentGames_.size(); i > 0; --i)
+        {
+            const RecentGame& g = recentGames_.at(i - 1);
+            list.push_back({{"gameId", g.gameId},
+                            {"secretWord", g.secretWord},
+                            {"difficulty", g.difficulty},
+                            {"result", g.result},
+                            {"attempts", g.attempts},
+                            {"score", g.score}});
+        }
+        res.status = 200;
+        res.set_content(list.dump(), "application/json");
     });
 
     // GET /api/dsa/sort?limit=N
