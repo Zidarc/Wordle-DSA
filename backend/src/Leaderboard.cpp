@@ -19,6 +19,27 @@ Leaderboard::Leaderboard(const std::string& filePath)
 {
 }
 
+std::string Leaderboard::cleanName(const std::string& name)
+{
+    std::string safe = name;
+    for (char& c : safe)
+    {
+        if (c == '|' || c == '\n' || c == '\r' || c == '\t')
+            c = ' ';
+    }
+    std::size_t first = safe.find_first_not_of(' ');
+    if (first == std::string::npos)
+        return "Anonymous";
+    std::size_t last = safe.find_last_not_of(' ');
+    safe = safe.substr(first, last - first + 1);
+    if (safe.size() > kMaxNameLength)
+    {
+        safe.resize(kMaxNameLength);
+        safe.erase(safe.find_last_not_of(' ') + 1);
+    }
+    return safe;
+}
+
 bool Leaderboard::addScore(const std::string& name, int score,
                            const std::string& difficulty, const std::string& date)
 {
@@ -26,15 +47,7 @@ bool Leaderboard::addScore(const std::string& name, int score,
     if (!file)
         return false;
 
-    // Sanitize name: remove delimiter '|' or newlines
-    std::string safeName = name;
-    for (char& c : safeName)
-    {
-        if (c == '|' || c == '\n' || c == '\r')
-            c = ' ';
-    }
-    if (safeName.empty())
-        safeName = "Anonymous";
+    std::string safeName = cleanName(name);
 
     file << safeName << "|" << score << "|" << difficulty << "|" << date << "\n";
     return true;

@@ -43,6 +43,13 @@ public:
     explicit Leaderboard(const std::string& filePath = "data/scores.txt");
 
     // Appends a new score record to the file.
+    // The name as it is stored: '|' and line breaks become spaces (they
+    // would break the file format), spaces are trimmed from both ends, at
+    // most kMaxNameLength characters are kept, and an empty name becomes
+    // "Anonymous".
+    static constexpr std::size_t kMaxNameLength = 20;
+    static std::string cleanName(const std::string& name);
+
     bool addScore(const std::string& name, int score,
                   const std::string& difficulty, const std::string& date);
 
