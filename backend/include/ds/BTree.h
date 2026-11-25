@@ -38,6 +38,8 @@
 #include <cstddef>
 #include <string>
 
+using namespace std;
+
 template <typename T, int Order = 3>
 class BTree
 {
@@ -164,9 +166,9 @@ public:
         nodeCount_ = 0;
     }
 
-    std::size_t size() const { return size_; }
+    size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
-    std::size_t nodeCount() const { return nodeCount_; }
+    size_t nodeCount() const { return nodeCount_; }
 
     // Levels in the tree (empty tree 0, a single leaf 1). Every leaf is at
     // this depth, so following the leftmost child is enough.
@@ -194,8 +196,8 @@ public:
         if (root_ == nullptr)
             return size_ == 0;
         int leafDepth = -1;
-        std::size_t keys = 0;
-        std::size_t nodes = 0;
+        size_t keys = 0;
+        size_t nodes = 0;
         if (!validate(root_, nullptr, nullptr, 1, leafDepth, keys, nodes, true))
             return false;
         return keys == size_ && nodes == nodeCount_;
@@ -203,8 +205,8 @@ public:
 
 private:
     Node* root_;
-    std::size_t size_;
-    std::size_t nodeCount_;
+    size_t size_;
+    size_t nodeCount_;
 
     // Adds key in the subtree under node. A child that overflows is split
     // here, so on return only node itself may hold Order keys.
@@ -283,10 +285,10 @@ private:
     }
 
     bool validate(const Node* node, const T* low, const T* high, int depth, int& leafDepth,
-                  std::size_t& keys, std::size_t& nodes, bool isRoot) const
+                  size_t& keys, size_t& nodes, bool isRoot) const
     {
         ++nodes;
-        keys += static_cast<std::size_t>(node->count);
+        keys += (size_t)(node->count);
         if (node->count > kMaxKeys || node->count < (isRoot ? 1 : kMinKeys))
             return false;
         for (int i = 0; i < node->count; ++i)

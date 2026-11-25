@@ -25,6 +25,8 @@
 #include <cstddef>
 #include <string>
 
+using namespace std;
+
 template <typename T>
 class BST
 {
@@ -108,7 +110,7 @@ public:
 
     // ----- queries -----
 
-    std::size_t size() const { return size_; }
+    size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
 
     // Returns the height of the tree (an empty tree has height 0,
@@ -120,7 +122,7 @@ public:
 
     // ----- binary tree properties (see BinaryTreeProperties.h) -----
 
-    std::size_t leafCount() const { return btCountLeaves(root_); }
+    size_t leafCount() const { return btCountLeaves(root_); }
     bool isFull() const { return btIsFull(root_); }
     bool isComplete() const { return btIsComplete(root_); }
     bool isPerfect() const { return btIsPerfect(root_); }
@@ -128,7 +130,7 @@ public:
 
 private:
     Node* root_;
-    std::size_t size_;
+    size_t size_;
 
     // ----- recursive helpers -----
 
@@ -202,16 +204,8 @@ private:
             return nullptr;
 
         Node* newNode = new Node(node->data);
-        try
-        {
-            newNode->left = copyTree(node->left);
-            newNode->right = copyTree(node->right);
-        }
-        catch (...)
-        {
-            destroy(newNode);
-            throw;
-        }
+        newNode->left = copyTree(node->left);
+        newNode->right = copyTree(node->right);
         return newNode;
     }
 };

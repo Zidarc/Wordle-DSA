@@ -5,7 +5,8 @@
 
 #include <chrono>
 #include <fstream>
-#include <stdexcept>
+
+using namespace std;
 
 bool LookupStats::allAgree() const
 {
@@ -60,22 +61,22 @@ const LookupMethodInfo kMethods[Dictionary::kMethodCount] = {
 const LookupMethodInfo& Dictionary::methodInfo(int index)
 {
     if (index < 0 || index >= kMethodCount)
-        throw std::out_of_range("Dictionary::methodInfo: index out of range");
+        throw "Dictionary::methodInfo: index out of range";
     return kMethods[index];
 }
 
 const LookupMethodInfo& Dictionary::methodInfo(LookupMethod method)
 {
-    return methodInfo(static_cast<int>(method));
+    return methodInfo((int)(method));
 }
 
-bool Dictionary::methodFromString(const std::string& name, LookupMethod& method)
+bool Dictionary::methodFromString(const string& name, LookupMethod& method)
 {
-    std::string lower = name;
+    string lower = name;
     for (char& c : lower)
     {
         if (c >= 'A' && c <= 'Z')
-            c = static_cast<char>(c - 'A' + 'a');
+            c = (char)(c - 'A' + 'a');
     }
     for (const LookupMethodInfo& info : kMethods)
     {
@@ -92,24 +93,24 @@ bool Dictionary::methodFromString(const std::string& name, LookupMethod& method)
 // Loading
 // ---------------------------------------------------------------------------
 
-std::size_t Dictionary::loadFromFile(const std::string& path)
+size_t Dictionary::loadFromFile(const string& path)
 {
-    std::ifstream file(path);
+    ifstream file(path);
     if (!file)
-        throw std::runtime_error("Dictionary: cannot open word list '" + path + "'");
+        throw "Dictionary: cannot open the word list file";
     return loadFromStream(file);
 }
 
 // GUIDE 3.1: hash table (dedupe) -> radix sort -> AVL + 2-3 tree
-std::size_t Dictionary::loadFromStream(std::istream& input)
+size_t Dictionary::loadFromStream(istream& input)
 {
     clear();
 
     // Read and clean every line. The hash table doubles as the duplicate check.
-    std::string line;
-    while (std::getline(input, line))
+    string line;
+    while (getline(input, line))
     {
-        std::string word = normalize(line);
+        string word = normalize(line);
         if (!isWellFormed(word))
             continue;
         if (table_.insert(word, true))
@@ -117,13 +118,13 @@ std::size_t Dictionary::loadFromStream(std::istream& input)
     }
 
     if (sortedWords_.empty())
-        throw std::runtime_error("Dictionary: the word list holds no valid 5-letter word");
+        throw "Dictionary: the word list holds no valid 5-letter word";
 
     // Every word is 5 letters from a 26-letter alphabet, so LSD radix sort fits:
     // O(5 * (n + 26)).
-    radixSortWords(sortedWords_, static_cast<int>(sortedWords_.size()), kWordLength);
+    radixSortWords(sortedWords_, (int)(sortedWords_.size()), kWordLength);
 
-    for (const std::string& word : sortedWords_)
+    for (const string& word : sortedWords_)
     {
         tree_.insert(word);
         btree_.insert(word);
@@ -144,10 +145,10 @@ void Dictionary::clear()
 // Word checks
 // ---------------------------------------------------------------------------
 
-std::string Dictionary::normalize(const std::string& word)
+string Dictionary::normalize(const string& word)
 {
-    std::size_t first = 0;
-    std::size_t last = word.size();
+    size_t first = 0;
+    size_t last = word.size();
     while (first < last && (word[first] == ' ' || word[first] == '\t' || word[first] == '\r' ||
                             word[first] == '\n'))
         ++first;
@@ -155,19 +156,19 @@ std::string Dictionary::normalize(const std::string& word)
                             word[last - 1] == '\r' || word[last - 1] == '\n'))
         --last;
 
-    std::string result = word.substr(first, last - first);
+    string result = word.substr(first, last - first);
     for (char& c : result)
     {
         if (c >= 'a' && c <= 'z')
-            c = static_cast<char>(c - 'a' + 'A');
+            c = (char)(c - 'a' + 'A');
     }
     return result;
 }
 
-bool Dictionary::isWellFormed(const std::string& word)
+bool Dictionary::isWellFormed(const string& word)
 {
-    std::string w = normalize(word);
-    if (static_cast<int>(w.size()) != kWordLength)
+    string w = normalize(word);
+    if ((int)(w.size()) != kWordLength)
         return false;
     for (char c : w)
     {
@@ -177,9 +178,9 @@ bool Dictionary::isWellFormed(const std::string& word)
     return true;
 }
 
-bool Dictionary::isInDictionary(const std::string& word) const
+bool Dictionary::isInDictionary(const string& word) const
 {
-    std::string w = normalize(word);
+    string w = normalize(word);
     if (!isWellFormed(w))
         return false;
     return table_.contains(w);
@@ -196,33 +197,33 @@ static LookupResult timedLookup(Lookup lookup, int repeats)
 
     int ignored = 0;
     volatile bool sink = false; // volatile: the loop cannot be optimised away
-    auto start = std::chrono::steady_clock::now();
+    auto start = chrono::steady_clock::now();
     for (int i = 0; i < repeats; ++i)
         sink = lookup(ignored);
-    auto end = std::chrono::steady_clock::now();
+    auto end = chrono::steady_clock::now();
     (void)sink;
 
-    long long total = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    long long total = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
     result.nanoseconds = total / repeats;
     return result;
 }
 
-LookupResult Dictionary::lookupWith(const std::string& word, LookupMethod method) const
+LookupResult Dictionary::lookupWith(const string& word, LookupMethod method) const
 {
     // All six run anyway for the comparison table; pick the chosen one.
     return lookupAll(word).get(method);
 }
 
 // GUIDE 2.1 / 3.3: all six lookups on one word, each timed
-LookupStats Dictionary::lookupAll(const std::string& word) const
+LookupStats Dictionary::lookupAll(const string& word) const
 {
     LookupStats stats;
     stats.word = normalize(word);
     if (!isWellFormed(stats.word) || sortedWords_.empty())
         return stats; // not a 5-letter word: every method reports "not found", 0 comparisons
 
-    const int n = static_cast<int>(sortedWords_.size());
-    const std::string& w = stats.word;
+    const int n = (int)(sortedWords_.size());
+    const string& w = stats.word;
     const int r = kTimingRepeats;
 
     stats.linear = timedLookup([&](int& c) { return linearSearch(sortedWords_, n, w, &c) != -1; }, r);
@@ -267,11 +268,11 @@ DictionaryStats Dictionary::stats() const
 
 bool Dictionary::treeMatchesSortedWords() const
 {
-    SafeArray<std::string> inOrder;
+    SafeArray<string> inOrder;
     tree_.toSortedArray(inOrder);
     if (inOrder.size() != sortedWords_.size())
         return false;
-    for (std::size_t i = 0; i < inOrder.size(); ++i)
+    for (size_t i = 0; i < inOrder.size(); ++i)
     {
         if (inOrder[i] != sortedWords_[i])
             return false;
@@ -283,11 +284,11 @@ bool Dictionary::btreeMatchesSortedWords() const
 {
     if (!btree_.isValid())
         return false;
-    SafeArray<std::string> inOrder;
+    SafeArray<string> inOrder;
     btree_.toSortedArray(inOrder);
     if (inOrder.size() != sortedWords_.size())
         return false;
-    for (std::size_t i = 0; i < inOrder.size(); ++i)
+    for (size_t i = 0; i < inOrder.size(); ++i)
     {
         if (inOrder[i] != sortedWords_[i])
             return false;

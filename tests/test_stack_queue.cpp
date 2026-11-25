@@ -20,9 +20,9 @@ TEST_CASE(stackStartsEmpty)
 TEST_CASE(stackPopAndPeekOnEmptyThrow)
 {
     Stack<int> stack;
-    CHECK_THROWS(stack.pop(), std::out_of_range);
-    CHECK_THROWS(stack.top(), std::out_of_range);
-    CHECK_THROWS(stack.peek(), std::out_of_range);
+    CHECK_THROWS(stack.pop());
+    CHECK_THROWS(stack.top());
+    CHECK_THROWS(stack.peek());
 }
 
 TEST_CASE(stackIsLastInFirstOut)
@@ -133,9 +133,9 @@ TEST_CASE(queueStartsEmpty)
 TEST_CASE(queueDequeueAndFrontOnEmptyThrow)
 {
     Queue<int> queue;
-    CHECK_THROWS(queue.dequeue(), std::out_of_range);
-    CHECK_THROWS(queue.front(), std::out_of_range);
-    CHECK_THROWS(queue.back(), std::out_of_range);
+    CHECK_THROWS(queue.dequeue());
+    CHECK_THROWS(queue.front());
+    CHECK_THROWS(queue.back());
 }
 
 TEST_CASE(queueIsFirstInFirstOut)
@@ -227,7 +227,7 @@ TEST_CASE(queueClear)
     queue.enqueue(2);
     queue.clear();
     CHECK(queue.empty());
-    CHECK_THROWS(queue.front(), std::out_of_range);
+    CHECK_THROWS(queue.front());
 }
 
 int main()

@@ -60,11 +60,11 @@ TEST_CASE(singlyEmptyList)
     CHECK(list.empty());
     CHECK_EQ(list.size(), 0u);
     CHECK(list.begin() == list.end());
-    CHECK_THROWS(list.front(), std::out_of_range);
-    CHECK_THROWS(list.back(), std::out_of_range);
-    CHECK_THROWS(list.popFront(), std::out_of_range);
-    CHECK_THROWS(list.popBack(), std::out_of_range);
-    CHECK_THROWS(list.at(0), std::out_of_range);
+    CHECK_THROWS(list.front());
+    CHECK_THROWS(list.back());
+    CHECK_THROWS(list.popFront());
+    CHECK_THROWS(list.popBack());
+    CHECK_THROWS(list.at(0));
     CHECK(!list.removeFirst(1));
 }
 
@@ -111,7 +111,7 @@ TEST_CASE(singlyInsertAtHeadMiddleTail)
     const int expected[] = {1, 2, 3, 4};
     CHECK(contentsAre(list, expected, 4));
     CHECK_EQ(list.back(), 4);
-    CHECK_THROWS(list.insertAt(9, 0), std::out_of_range);
+    CHECK_THROWS(list.insertAt(9, 0));
 }
 
 TEST_CASE(singlyRemoveAtHeadMiddleTail)
@@ -128,7 +128,7 @@ TEST_CASE(singlyRemoveAtHeadMiddleTail)
     CHECK_EQ(list.back(), 4);
     list.pushBack(6); // tail pointer must have been updated
     CHECK_EQ(list.back(), 6);
-    CHECK_THROWS(list.removeAt(3), std::out_of_range);
+    CHECK_THROWS(list.removeAt(3));
 }
 
 TEST_CASE(singlyAtAndContains)
@@ -141,7 +141,7 @@ TEST_CASE(singlyAtAndContains)
     CHECK_EQ(list.at(1), std::string("CRANE"));
     CHECK(list.contains("SLATE"));
     CHECK(!list.contains("PLUMB"));
-    CHECK_THROWS(list.at(3), std::out_of_range);
+    CHECK_THROWS(list.at(3));
 }
 
 TEST_CASE(singlyRemoveFirstMatchOnly)
@@ -254,11 +254,11 @@ TEST_CASE(doublyEmptyList)
     DoublyLinkedList<int> list;
     CHECK(list.empty());
     CHECK(list.begin() == list.end());
-    CHECK_THROWS(list.front(), std::out_of_range);
-    CHECK_THROWS(list.back(), std::out_of_range);
-    CHECK_THROWS(list.popFront(), std::out_of_range);
-    CHECK_THROWS(list.popBack(), std::out_of_range);
-    CHECK_THROWS(list.removeAt(0), std::out_of_range);
+    CHECK_THROWS(list.front());
+    CHECK_THROWS(list.back());
+    CHECK_THROWS(list.popFront());
+    CHECK_THROWS(list.popBack());
+    CHECK_THROWS(list.removeAt(0));
 }
 
 TEST_CASE(doublyPushAndPopBothEnds)
@@ -359,7 +359,7 @@ TEST_CASE(doublyAtWalksFromNearerEnd)
     fillWith(list, 0, 99);
     for (std::size_t i = 0; i < 100; ++i)
         CHECK_EQ(list.at(i), static_cast<int>(i));
-    CHECK_THROWS(list.at(100), std::out_of_range);
+    CHECK_THROWS(list.at(100));
 }
 
 TEST_CASE(doublyRemoveFirstAndContains)
@@ -432,10 +432,10 @@ TEST_CASE(circularEmptyList)
     CHECK(list.empty());
     CHECK(list.begin() == list.end());
     CHECK(!list.cursorAtStart());
-    CHECK_THROWS(list.front(), std::out_of_range);
-    CHECK_THROWS(list.current(), std::out_of_range);
-    CHECK_THROWS(list.advance(), std::out_of_range);
-    CHECK_THROWS(list.popFront(), std::out_of_range);
+    CHECK_THROWS(list.front());
+    CHECK_THROWS(list.current());
+    CHECK_THROWS(list.advance());
+    CHECK_THROWS(list.popFront());
     CHECK(!list.removeFirst(1));
 }
 

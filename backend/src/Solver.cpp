@@ -2,6 +2,8 @@
 
 #include "algorithms/Sort.h"
 
+using namespace std;
+
 Solver::Solver(const Dictionary& dictionary)
     : dictionary_(dictionary)
 {
@@ -12,42 +14,42 @@ void Solver::reset()
 {
     constraints_.reset();
     candidates_.clear();
-    for (const std::string& word : dictionary_.sortedWords())
+    for (const string& word : dictionary_.sortedWords())
         candidates_.pushBack(word);
 }
 
-int Solver::applyGuess(const std::string& guess, const LetterState* feedback)
+int Solver::applyGuess(const string& guess, const LetterState* feedback)
 {
     constraints_.add(Dictionary::normalize(guess), feedback);
 
     const Constraints& rules = constraints_;
-    std::size_t removed =
-        candidates_.removeAllIf([&rules](const std::string& w) { return !rules.matches(w); });
-    return static_cast<int>(removed);
+    size_t removed =
+        candidates_.removeAllIf([&rules](const string& w) { return !rules.matches(w); });
+    return (int)(removed);
 }
 
 int Solver::applyHint(int pos, char letter)
 {
     if (letter >= 'a' && letter <= 'z')
-        letter = static_cast<char>(letter - 'a' + 'A');
+        letter = (char)(letter - 'a' + 'A');
     constraints_.addKnownLetter(pos, letter);
 
     const Constraints& rules = constraints_;
-    std::size_t removed =
-        candidates_.removeAllIf([&rules](const std::string& w) { return !rules.matches(w); });
-    return static_cast<int>(removed);
+    size_t removed =
+        candidates_.removeAllIf([&rules](const string& w) { return !rules.matches(w); });
+    return (int)(removed);
 }
 
-bool Solver::isCandidate(const std::string& word, ListSearchStats* stats) const
+bool Solver::isCandidate(const string& word, ListSearchStats* stats) const
 {
     return binarySearchList(candidates_, Dictionary::normalize(word), stats) != -1;
 }
 
-bool Solver::isDictionaryPrefix(const std::string& prefix, long long* comparisons) const
+bool Solver::isDictionaryPrefix(const string& prefix, long long* comparisons) const
 {
-    const SafeArray<std::string>& words = dictionary_.sortedWords();
+    const SafeArray<string>& words = dictionary_.sortedWords();
     int low = 0;
-    int high = static_cast<int>(words.size()); // search in [low, high)
+    int high = (int)(words.size()); // search in [low, high)
     while (low < high)
     {
         int mid = low + (high - low) / 2;
@@ -58,18 +60,18 @@ bool Solver::isDictionaryPrefix(const std::string& prefix, long long* comparison
         else
             high = mid;
     }
-    if (low == static_cast<int>(words.size()))
+    if (low == (int)(words.size()))
         return false;
     return words[low].compare(0, prefix.size(), prefix) == 0;
 }
 
-SafeArray<std::string> Solver::generateCandidates(BacktrackStats* stats) const
+SafeArray<string> Solver::generateCandidates(BacktrackStats* stats) const
 {
     BacktrackStats local;
-    SafeArray<std::string> out;
-    std::string prefix;
+    SafeArray<string> out;
+    string prefix;
     extend(prefix, out, local);
-    local.solutions = static_cast<int>(out.size());
+    local.solutions = (int)(out.size());
     if (stats)
         *stats = local;
     return out;
@@ -77,9 +79,9 @@ SafeArray<std::string> Solver::generateCandidates(BacktrackStats* stats) const
 
 // One level of the recursion: choose the letter for position prefix.size().
 // GUIDE 2.6: backtracking - choose, explore, un-choose
-void Solver::extend(std::string& prefix, SafeArray<std::string>& out, BacktrackStats& stats) const
+void Solver::extend(string& prefix, SafeArray<string>& out, BacktrackStats& stats) const
 {
-    const int depth = static_cast<int>(prefix.size());
+    const int depth = (int)(prefix.size());
     if (depth > stats.maxDepth)
         stats.maxDepth = depth;
 
@@ -113,28 +115,28 @@ namespace
 {
 struct Frame
 {
-    std::string prefix;
+    string prefix;
     char next = 'A'; // next letter to try at position prefix.size()
 };
 } // namespace
 
-SafeArray<std::string> Solver::generateCandidatesIterative(BacktrackStats* stats) const
+SafeArray<string> Solver::generateCandidatesIterative(BacktrackStats* stats) const
 {
     BacktrackStats local;
-    SafeArray<std::string> out;
+    SafeArray<string> out;
     ArrayStack<Frame> stack;
     stack.push(Frame());
 
     while (!stack.empty())
     {
-        if (static_cast<int>(stack.size()) > local.maxDepth)
-            local.maxDepth = static_cast<int>(stack.size());
+        if ((int)(stack.size()) > local.maxDepth)
+            local.maxDepth = (int)(stack.size());
 
         Frame frame = stack.pop();
         if (frame.next > 'Z')
             continue; // every letter tried at this level: backtrack
 
-        const int depth = static_cast<int>(frame.prefix.size());
+        const int depth = (int)(frame.prefix.size());
         const char c = frame.next;
 
         Frame sameLevel = frame; // come back later for the following letter
@@ -148,14 +150,14 @@ SafeArray<std::string> Solver::generateCandidatesIterative(BacktrackStats* stats
             continue;
         }
 
-        std::string longer = frame.prefix + c;
+        string longer = frame.prefix + c;
         if (!constraints_.fitsCounts(longer) || !isDictionaryPrefix(longer, &local.prefixChecks))
         {
             ++local.pruned;
             continue;
         }
 
-        if (static_cast<int>(longer.size()) == Constraints::kLength)
+        if ((int)(longer.size()) == Constraints::kLength)
         {
             out.pushBack(longer);
         }
@@ -167,28 +169,28 @@ SafeArray<std::string> Solver::generateCandidatesIterative(BacktrackStats* stats
         }
     }
 
-    local.solutions = static_cast<int>(out.size());
+    local.solutions = (int)(out.size());
     if (stats)
         *stats = local;
     return out;
 }
 
 // GUIDE 2.6: FrequencyTable score + quickSort ranking
-SafeArray<RankedWord> Solver::suggestions(std::size_t count) const
+SafeArray<RankedWord> Solver::suggestions(size_t count) const
 {
     FrequencyTable table;
     table.build(candidates_);
 
     SafeArray<RankedWord> ranked;
     ranked.reserve(candidates_.size());
-    for (const std::string& word : candidates_)
+    for (const string& word : candidates_)
     {
         RankedWord r;
         r.word = word;
         r.score = table.score(word);
         ranked.pushBack(r);
     }
-    quickSort(ranked, static_cast<int>(ranked.size()));
+    quickSort(ranked, (int)(ranked.size()));
 
     while (ranked.size() > count)
         ranked.popBack();

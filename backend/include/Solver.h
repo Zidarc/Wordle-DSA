@@ -46,6 +46,8 @@
 
 #include <string>
 
+using namespace std;
+
 // Counters for one backtracking run, for the DSA Insights panel.
 struct BacktrackStats
 {
@@ -59,7 +61,7 @@ struct BacktrackStats
 // A suggested guess and its letter-frequency score.
 struct RankedWord
 {
-    std::string word;
+    string word;
     long long score = 0;
 
     // "Less" means "ranks earlier": higher score first, then A-Z.
@@ -78,7 +80,7 @@ public:
     explicit Solver(const Dictionary& dictionary);
 
     // Applies one guess and its feedback; returns how many words were removed.
-    int applyGuess(const std::string& guess, const LetterState* feedback);
+    int applyGuess(const string& guess, const LetterState* feedback);
 
     // Applies a revealed hint (letter known at pos); returns how many words
     // were removed. Same one-pass removeAllIf filter as applyGuess.
@@ -87,39 +89,39 @@ public:
     // Back to the full dictionary, no constraints.
     void reset();
 
-    std::size_t remaining() const { return candidates_.size(); }
-    const SinglyLinkedList<std::string>& candidates() const { return candidates_; }
+    size_t remaining() const { return candidates_.size(); }
+    const SinglyLinkedList<string>& candidates() const { return candidates_; }
     const Constraints& constraints() const { return constraints_; }
 
     // Is the word still possible? Binary search on the sorted linked list.
-    bool isCandidate(const std::string& word, ListSearchStats* stats = nullptr) const;
+    bool isCandidate(const string& word, ListSearchStats* stats = nullptr) const;
 
     // Backtracking search for every dictionary word that fits the
     // constraints, recursively. The result is in sorted order and always
     // equals candidates().
-    SafeArray<std::string> generateCandidates(BacktrackStats* stats = nullptr) const;
+    SafeArray<string> generateCandidates(BacktrackStats* stats = nullptr) const;
 
     // The same search with the recursion simulated by our own ArrayStack
     // (lab week 9). Each stack frame is (prefix, next letter to try); the
     // loop pops a frame, tries its next letter, pushes the frame back if it
     // has letters left, and pushes a new frame one level deeper when the
     // letter is accepted. Gives exactly the same words in the same order.
-    SafeArray<std::string> generateCandidatesIterative(BacktrackStats* stats = nullptr) const;
+    SafeArray<string> generateCandidatesIterative(BacktrackStats* stats = nullptr) const;
 
     // The best next guesses among the possible words: a FrequencyTable is
     // built from the candidates, every candidate is scored, and the scores
     // are ranked with quick sort (lab week 7). Returns at most `count` words.
-    SafeArray<RankedWord> suggestions(std::size_t count = 5) const;
+    SafeArray<RankedWord> suggestions(size_t count = 5) const;
 
     // True if some dictionary word starts with prefix. Binary search for the
     // first word >= prefix, then compare its first letters.
-    bool isDictionaryPrefix(const std::string& prefix, long long* comparisons = nullptr) const;
+    bool isDictionaryPrefix(const string& prefix, long long* comparisons = nullptr) const;
 
 private:
     const Dictionary& dictionary_;
 
-    void extend(std::string& prefix, SafeArray<std::string>& out, BacktrackStats& stats) const;
-    SinglyLinkedList<std::string> candidates_;
+    void extend(string& prefix, SafeArray<string>& out, BacktrackStats& stats) const;
+    SinglyLinkedList<string> candidates_;
     Constraints constraints_;
 };
 

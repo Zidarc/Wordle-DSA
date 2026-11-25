@@ -21,13 +21,15 @@
 
 #include <string>
 
+using namespace std;
+
 // ----- tail recursion -----
 // Counts how many times `letter` appears in word[from..]. The running total
 // travels in `acc`, so nothing is left to do after the recursive call.
 // GUIDE 2.5: one example per recursion type below
-inline int countLetterTail(const std::string& word, char letter, int from = 0, int acc = 0)
+inline int countLetterTail(const string& word, char letter, int from = 0, int acc = 0)
 {
-    if (from >= static_cast<int>(word.size()))
+    if (from >= (int)(word.size()))
         return acc;
     return countLetterTail(word, letter, from + 1, acc + (word[from] == letter ? 1 : 0));
 }
@@ -35,11 +37,11 @@ inline int countLetterTail(const std::string& word, char letter, int from = 0, i
 // ----- head recursion -----
 // Reverses a word: the recursive call happens first, and each letter is
 // appended while the calls return.
-inline std::string reverseHead(const std::string& word, int index = 0)
+inline string reverseHead(const string& word, int index = 0)
 {
-    if (index >= static_cast<int>(word.size()))
+    if (index >= (int)(word.size()))
         return "";
-    std::string rest = reverseHead(word, index + 1);
+    string rest = reverseHead(word, index + 1);
     return rest + word[index];
 }
 
@@ -76,23 +78,23 @@ inline bool isVowel(char c)
     return c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
 }
 
-bool alternatesFromConsonant(const std::string& word, int index);
+bool alternatesFromConsonant(const string& word, int index);
 
-inline bool alternatesFromVowel(const std::string& word, int index)
+inline bool alternatesFromVowel(const string& word, int index)
 {
-    if (index >= static_cast<int>(word.size()))
+    if (index >= (int)(word.size()))
         return true;
     return isVowel(word[index]) && alternatesFromConsonant(word, index + 1);
 }
 
-inline bool alternatesFromConsonant(const std::string& word, int index)
+inline bool alternatesFromConsonant(const string& word, int index)
 {
-    if (index >= static_cast<int>(word.size()))
+    if (index >= (int)(word.size()))
         return true;
     return !isVowel(word[index]) && alternatesFromVowel(word, index + 1);
 }
 
-inline bool isAlternatingWord(const std::string& word)
+inline bool isAlternatingWord(const string& word)
 {
     return alternatesFromVowel(word, 0) || alternatesFromConsonant(word, 0);
 }

@@ -23,6 +23,8 @@
 #include <istream>
 #include <string>
 
+using namespace std;
+
 // The six ways to look a word up. The player picks one in the UI; the game
 // then accepts or rejects guesses using that method's answer.
 // TIP: the switch in Dictionary::lookupWith maps each one to its code.
@@ -61,7 +63,7 @@ struct LookupResult
 // The same word checked by all six methods.
 struct LookupStats
 {
-    std::string word; // normalised (upper-case) form of the input
+    string word; // normalised (upper-case) form of the input
     LookupResult linear;
     LookupResult binary;
     LookupResult interpolation;
@@ -80,17 +82,17 @@ struct LookupStats
 // Sizes and shape of the structures, for GET /api/dsa/stats.
 struct DictionaryStats
 {
-    std::size_t wordCount = 0;
+    size_t wordCount = 0;
     int avlHeight = 0;
-    std::size_t avlLeaves = 0;
+    size_t avlLeaves = 0;
     bool avlBalanced = true;
     int btreeHeight = 0;
-    std::size_t btreeNodes = 0;
-    std::size_t hashSize = 0;
-    std::size_t hashBuckets = 0;
-    std::size_t hashUsedBuckets = 0;
-    std::size_t hashLongestChain = 0;
-    std::size_t hashRehashCount = 0;
+    size_t btreeNodes = 0;
+    size_t hashSize = 0;
+    size_t hashBuckets = 0;
+    size_t hashUsedBuckets = 0;
+    size_t hashLongestChain = 0;
+    size_t hashRehashCount = 0;
     double hashLoadFactor = 0.0;
 };
 
@@ -107,45 +109,45 @@ public:
     Dictionary() = default;
 
     // Loads the words from a file, one word per line. Replaces any words already loaded.
-    // Throws std::runtime_error if the file cannot be opened or holds no valid word.
+    // Throws an error if the file cannot be opened or holds no valid word.
     // Returns the number of words loaded.
-    std::size_t loadFromFile(const std::string& path);
+    size_t loadFromFile(const string& path);
 
     // Same as loadFromFile, but reads from any stream (used by the tests).
-    std::size_t loadFromStream(std::istream& input);
+    size_t loadFromStream(istream& input);
 
     // Upper-cases the word and trims surrounding whitespace. Does not validate it.
-    static std::string normalize(const std::string& word);
+    static string normalize(const string& word);
 
     // True if the word has exactly 5 letters A-Z (after normalising).
-    static bool isWellFormed(const std::string& word);
+    static bool isWellFormed(const string& word);
 
     // The check the game relies on: a hash table lookup. Case-insensitive.
-    bool isInDictionary(const std::string& word) const;
+    bool isInDictionary(const string& word) const;
 
     static constexpr int kMethodCount = 6;
 
-    // Name and complexity of each method (index = static_cast<int>(method)).
+    // Name and complexity of each method (index = (int)(method)).
     static const LookupMethodInfo& methodInfo(LookupMethod method);
     static const LookupMethodInfo& methodInfo(int index);
 
     // "linear", "binary", "interpolation", "avl", "btree", "hash" (any case).
     // Returns false for an unknown name and leaves `method` unchanged.
-    static bool methodFromString(const std::string& name, LookupMethod& method);
+    static bool methodFromString(const string& name, LookupMethod& method);
 
     // Checks a word with one chosen method (timed and counted).
-    LookupResult lookupWith(const std::string& word, LookupMethod method) const;
+    LookupResult lookupWith(const string& word, LookupMethod method) const;
 
     // Runs all six lookup methods on the same word and counts their comparisons.
-    LookupStats lookupAll(const std::string& word) const;
+    LookupStats lookupAll(const string& word) const;
 
     DictionaryStats stats() const;
 
-    std::size_t size() const { return sortedWords_.size(); }
+    size_t size() const { return sortedWords_.size(); }
     bool empty() const { return sortedWords_.empty(); }
 
     // All words in sorted order (used to build the WordPicker).
-    const SafeArray<std::string>& sortedWords() const { return sortedWords_; }
+    const SafeArray<string>& sortedWords() const { return sortedWords_; }
 
     // Checks the AVL tree with an iterative in-order traversal (our own Stack):
     // true if it returns exactly the sorted array.
@@ -157,13 +159,13 @@ public:
     // Shape of the dictionary's AVL tree (full / complete / leaves ...).
     TreeShape avlShape() const { return tree_.shape(); }
 
-    const BTree<std::string>& btree() const { return btree_; }
+    const BTree<string>& btree() const { return btree_; }
 
 private:
-    SafeArray<std::string> sortedWords_;
-    AVLTree<std::string> tree_;
-    BTree<std::string> btree_;
-    HashTable<std::string, bool> table_;
+    SafeArray<string> sortedWords_;
+    AVLTree<string> tree_;
+    BTree<string> btree_;
+    HashTable<string, bool> table_;
 
     void clear();
 };

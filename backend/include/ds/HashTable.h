@@ -11,7 +11,7 @@
 // (key, value) entries, so keys that hash to the same bucket share a chain
 // (separate chaining). New entries go to the front of their chain.
 //
-// Hash function: KeyHash<K>. For std::string it is a polynomial rolling hash,
+// Hash function: KeyHash<K>. For string it is a polynomial rolling hash,
 //   h = s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]   (mod 2^64)
 // computed with Horner's rule. Integer keys hash to their own value.
 //
@@ -36,48 +36,35 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <stdexcept>
 #include <string>
-#include <type_traits>
+
+using namespace std;
 
 // ---------------------------------------------------------------------------
-// Hash functions
+// Hash functions (the table picks the right one by the key's type)
 // ---------------------------------------------------------------------------
-
-template <typename K, typename Enable = void>
-struct KeyHash; // only the specialisations below are defined
 
 // Polynomial rolling hash for strings.
-template <>
-struct KeyHash<std::string>
+// GUIDE 1.9: polynomial rolling hash, h = h*31 + c (Horner)
+inline uint64_t hashKey(const string& key)
 {
-    static constexpr std::uint64_t kBase = 31;
+    uint64_t hash = 0;
+    for (char c : key)
+        hash = hash * 31 + (unsigned char)c; // wraps mod 2^64
+    return hash;
+}
 
-    // GUIDE 1.9: polynomial rolling hash, h = h*31 + c (Horner)
-    std::uint64_t operator()(const std::string& key) const
-    {
-        std::uint64_t hash = 0;
-        for (char c : key)
-            hash = hash * kBase + static_cast<unsigned char>(c); // wraps mod 2^64
-        return hash;
-    }
-};
-
-// Integer keys (int, long, char, ...) hash to their own value.
-template <typename K>
-struct KeyHash<K, typename std::enable_if<std::is_integral<K>::value>::type>
+// Integer keys hash to their own value.
+inline uint64_t hashKey(long long key)
 {
-    std::uint64_t operator()(K key) const
-    {
-        return static_cast<std::uint64_t>(key);
-    }
-};
+    return (uint64_t)key;
+}
 
 // ---------------------------------------------------------------------------
 // HashTable
 // ---------------------------------------------------------------------------
 
-template <typename K, typename V, typename Hash = KeyHash<K>>
+template <typename K, typename V>
 class HashTable
 {
 public:
@@ -87,12 +74,12 @@ public:
         V value;
     };
 
-    static constexpr std::size_t kDefaultBucketCount = 11;
+    static constexpr size_t kDefaultBucketCount = 11;
     static constexpr double kMaxLoadFactor = 0.75;
 
     // ----- construction / Rule of Three -----
 
-    explicit HashTable(std::size_t initialBuckets = kDefaultBucketCount)
+    explicit HashTable(size_t initialBuckets = kDefaultBucketCount)
         : buckets_(nullptr), bucketCount_(0), size_(0), rehashCount_(0)
     {
         bucketCount_ = nextPrime(initialBuckets < 2 ? 2 : initialBuckets);
@@ -109,16 +96,8 @@ public:
           rehashCount_(other.rehashCount_)
     {
         buckets_ = new SinglyLinkedList<Entry>[bucketCount_];
-        try
-        {
-            for (std::size_t i = 0; i < bucketCount_; ++i)
-                buckets_[i] = other.buckets_[i]; // SinglyLinkedList deep-copies its nodes
-        }
-        catch (...)
-        {
-            delete[] buckets_; // don't leak the buckets copied so far
-            throw;
-        }
+        for (size_t i = 0; i < bucketCount_; ++i)
+            buckets_[i] = other.buckets_[i]; // SinglyLinkedList deep-copies its nodes
     }
 
     HashTable& operator=(const HashTable& other)
@@ -187,12 +166,12 @@ public:
         return entry == nullptr ? nullptr : &entry->value;
     }
 
-    // Returns the value for key. Throws std::out_of_range if the key is missing.
+    // Returns the value for key. Throws an error if the key is missing.
     V& at(const K& key)
     {
         V* value = find(key);
         if (value == nullptr)
-            throw std::out_of_range("HashTable::at: key not found");
+            throw "HashTable::at: key not found";
         return *value;
     }
 
@@ -200,7 +179,7 @@ public:
     {
         const V* value = find(key);
         if (value == nullptr)
-            throw std::out_of_range("HashTable::at: key not found");
+            throw "HashTable::at: key not found";
         return *value;
     }
 
@@ -218,7 +197,7 @@ public:
     // Removes every entry but keeps the current bucket count.
     void clear()
     {
-        for (std::size_t i = 0; i < bucketCount_; ++i)
+        for (size_t i = 0; i < bucketCount_; ++i)
             buckets_[i].clear();
         size_ = 0;
     }
@@ -229,7 +208,7 @@ public:
     template <typename Visitor>
     void forEach(Visitor visit) const
     {
-        for (std::size_t i = 0; i < bucketCount_; ++i)
+        for (size_t i = 0; i < bucketCount_; ++i)
         {
             for (const Entry& entry : buckets_[i])
                 visit(entry.key, entry.value);
@@ -238,21 +217,21 @@ public:
 
     // ----- statistics (for the DSA Insights panel) -----
 
-    std::size_t size() const { return size_; }
+    size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
-    std::size_t bucketCount() const { return bucketCount_; }
-    std::size_t rehashCount() const { return rehashCount_; }
+    size_t bucketCount() const { return bucketCount_; }
+    size_t rehashCount() const { return rehashCount_; }
 
     double loadFactor() const
     {
-        return static_cast<double>(size_) / static_cast<double>(bucketCount_);
+        return (double)(size_) / (double)(bucketCount_);
     }
 
     // Length of the longest collision chain.
-    std::size_t longestChain() const
+    size_t longestChain() const
     {
-        std::size_t longest = 0;
-        for (std::size_t i = 0; i < bucketCount_; ++i)
+        size_t longest = 0;
+        for (size_t i = 0; i < bucketCount_; ++i)
         {
             if (buckets_[i].size() > longest)
                 longest = buckets_[i].size();
@@ -261,10 +240,10 @@ public:
     }
 
     // Number of buckets that hold at least one entry.
-    std::size_t usedBuckets() const
+    size_t usedBuckets() const
     {
-        std::size_t used = 0;
-        for (std::size_t i = 0; i < bucketCount_; ++i)
+        size_t used = 0;
+        for (size_t i = 0; i < bucketCount_; ++i)
         {
             if (!buckets_[i].empty())
                 ++used;
@@ -273,9 +252,9 @@ public:
     }
 
     // Which bucket a key belongs to (exposed so tests can build collisions).
-    std::size_t bucketIndex(const K& key) const
+    size_t bucketIndex(const K& key) const
     {
-        return static_cast<std::size_t>(Hash{}(key) % bucketCount_);
+        return (size_t)(hashKey(key) % bucketCount_);
     }
 
     // ----- rehashing -----
@@ -284,26 +263,18 @@ public:
     // to a prime). Called automatically by insert(); public so it can be shown
     // and tested on its own.
     // GUIDE 1.9: called by insert() when load factor > 0.75
-    void rehash(std::size_t newBucketCount)
+    void rehash(size_t newBucketCount)
     {
         newBucketCount = nextPrime(newBucketCount < 2 ? 2 : newBucketCount);
         SinglyLinkedList<Entry>* newBuckets = new SinglyLinkedList<Entry>[newBucketCount];
 
-        try
+        for (size_t i = 0; i < bucketCount_; ++i)
         {
-            for (std::size_t i = 0; i < bucketCount_; ++i)
+            for (const Entry& entry : buckets_[i])
             {
-                for (const Entry& entry : buckets_[i])
-                {
-                    std::size_t index = static_cast<std::size_t>(Hash{}(entry.key) % newBucketCount);
-                    newBuckets[index].pushFront(entry);
-                }
+                size_t index = (size_t)(hashKey(entry.key) % newBucketCount);
+                newBuckets[index].pushFront(entry);
             }
-        }
-        catch (...)
-        {
-            delete[] newBuckets; // old table is still intact
-            throw;
         }
 
         delete[] buckets_;
@@ -314,9 +285,9 @@ public:
 
 private:
     SinglyLinkedList<Entry>* buckets_;
-    std::size_t bucketCount_;
-    std::size_t size_;
-    std::size_t rehashCount_;
+    size_t bucketCount_;
+    size_t size_;
+    size_t rehashCount_;
 
     SinglyLinkedList<Entry>& bucketFor(const K& key)
     {
@@ -334,7 +305,7 @@ private:
         buckets_ = other.buckets_;
         other.buckets_ = buckets;
 
-        std::size_t value = bucketCount_;
+        size_t value = bucketCount_;
         bucketCount_ = other.bucketCount_;
         other.bucketCount_ = value;
 
@@ -347,13 +318,13 @@ private:
         other.rehashCount_ = value;
     }
 
-    static bool isPrime(std::size_t n)
+    static bool isPrime(size_t n)
     {
         if (n < 2)
             return false;
         if (n % 2 == 0)
             return n == 2;
-        for (std::size_t d = 3; d * d <= n; d += 2)
+        for (size_t d = 3; d * d <= n; d += 2)
         {
             if (n % d == 0)
                 return false;
@@ -362,7 +333,7 @@ private:
     }
 
     // Smallest prime >= n.
-    static std::size_t nextPrime(std::size_t n)
+    static size_t nextPrime(size_t n)
     {
         while (!isPrime(n))
             ++n;

@@ -9,6 +9,8 @@
 
 #include "Difficulty.h"
 
+using namespace std;
+
 class Score
 {
 public:

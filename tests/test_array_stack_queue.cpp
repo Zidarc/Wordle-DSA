@@ -17,8 +17,8 @@ TEST_CASE(arrayStackStartsEmpty)
     ArrayStack<int> s;
     CHECK(s.empty());
     CHECK_EQ(s.size(), 0u);
-    CHECK_THROWS(s.pop(), std::out_of_range);
-    CHECK_THROWS(s.top(), std::out_of_range);
+    CHECK_THROWS(s.pop());
+    CHECK_THROWS(s.top());
 }
 
 TEST_CASE(arrayStackIsLastInFirstOut)
@@ -93,10 +93,10 @@ TEST_CASE(arrayQueueStartsEmpty)
 {
     ArrayQueue<int> q;
     CHECK(q.empty());
-    CHECK_THROWS(q.dequeue(), std::out_of_range);
-    CHECK_THROWS(q.front(), std::out_of_range);
-    CHECK_THROWS(q.back(), std::out_of_range);
-    CHECK_THROWS(q.at(0), std::out_of_range);
+    CHECK_THROWS(q.dequeue());
+    CHECK_THROWS(q.front());
+    CHECK_THROWS(q.back());
+    CHECK_THROWS(q.at(0));
 }
 
 TEST_CASE(arrayQueueIsFirstInFirstOut)

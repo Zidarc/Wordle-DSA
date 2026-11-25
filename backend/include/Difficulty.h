@@ -10,6 +10,8 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 enum class Difficulty
 {
     Easy = 0,
@@ -31,11 +33,11 @@ inline const char* toString(Difficulty d)
     }
 }
 
-inline Difficulty difficultyFromString(const std::string& str)
+inline Difficulty difficultyFromString(const string& str)
 {
-    std::string lower;
+    string lower;
     for (char c : str)
-        lower += static_cast<char>(c >= 'A' && c <= 'Z' ? c - 'A' + 'a' : c);
+        lower += (char)(c >= 'A' && c <= 'Z' ? c - 'A' + 'a' : c);
 
     if (lower == "easy")
         return Difficulty::Easy;
@@ -77,7 +79,7 @@ inline bool requiresHintReuse(Difficulty d)
     return d == Difficulty::Hard;
 }
 
-inline std::ostream& operator<<(std::ostream& os, Difficulty d)
+inline ostream& operator<<(ostream& os, Difficulty d)
 {
     return os << toString(d);
 }

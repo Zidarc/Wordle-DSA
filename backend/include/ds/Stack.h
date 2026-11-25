@@ -16,15 +16,16 @@
 // compiler-generated destructor, copy constructor and copy assignment are
 // correct. They are declared explicitly below to show this is deliberate.
 //
-// pop / top on an empty stack throw std::out_of_range.
+// pop / top on an empty stack throw an error.
 //
 // Complexity: push, pop, top, size, empty are all O(1).
 
 #include "ds/SinglyLinkedList.h"
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class Stack
@@ -46,7 +47,7 @@ public:
     // Removes the top element and returns it.
     T pop()
     {
-        checkNotEmpty("pop");
+        checkNotEmpty();
         T value = list_.front();
         list_.popFront();
         return value;
@@ -54,13 +55,13 @@ public:
 
     T& top()
     {
-        checkNotEmpty("top");
+        checkNotEmpty();
         return list_.front();
     }
 
     const T& top() const
     {
-        checkNotEmpty("top");
+        checkNotEmpty();
         return list_.front();
     }
 
@@ -68,7 +69,7 @@ public:
     const T& peek() const { return top(); }
 
     void clear() { list_.clear(); }
-    std::size_t size() const { return list_.size(); }
+    size_t size() const { return list_.size(); }
     bool empty() const { return list_.empty(); }
 
     // Iterates from the top of the stack to the bottom (most recent guess first),
@@ -79,10 +80,10 @@ public:
 private:
     SinglyLinkedList<T> list_;
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (list_.empty())
-            throw std::out_of_range(std::string("Stack::") + operation + " on an empty stack");
+            throw "Stack: the stack is empty";
     }
 };
 

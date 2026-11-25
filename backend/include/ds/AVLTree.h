@@ -4,7 +4,7 @@
 // AVLTree<T>: a self-balancing Binary Search Tree with rotations.
 //
 // Used for: dictionary word validation. The entire word list is inserted into
-// an AVLTree<std::string> so that any word can be found in O(log n).
+// an AVLTree<string> so that any word can be found in O(log n).
 //
 // The tree rebalances itself after every insertion using four rotation cases:
 //   LL (single right rotation)
@@ -35,6 +35,8 @@
 
 #include <cstddef>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class AVLTree
@@ -121,7 +123,7 @@ public:
 
     // ----- queries -----
 
-    std::size_t size() const { return size_; }
+    size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
 
     // Returns the height of the tree (an empty tree has height 0).
@@ -132,7 +134,7 @@ public:
 
     // ----- binary tree properties (see BinaryTreeProperties.h) -----
 
-    std::size_t leafCount() const { return btCountLeaves(root_); }
+    size_t leafCount() const { return btCountLeaves(root_); }
     bool isFull() const { return btIsFull(root_); }
     bool isComplete() const { return btIsComplete(root_); }
     bool isPerfect() const { return btIsPerfect(root_); }
@@ -184,7 +186,7 @@ public:
 
 private:
     Node* root_;
-    std::size_t size_;
+    size_t size_;
 
     // ----- height helpers -----
 
@@ -355,16 +357,8 @@ private:
 
         Node* newNode = new Node(node->data);
         newNode->height = node->height;
-        try
-        {
-            newNode->left = copyTree(node->left);
-            newNode->right = copyTree(node->right);
-        }
-        catch (...)
-        {
-            destroy(newNode);
-            throw;
-        }
+        newNode->left = copyTree(node->left);
+        newNode->right = copyTree(node->right);
         return newNode;
     }
 };

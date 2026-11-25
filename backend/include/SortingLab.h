@@ -19,10 +19,12 @@
 #include <cstddef>
 #include <string>
 
+using namespace std;
+
 struct SortRun
 {
-    std::string algorithm;     // "bubble", "selection", ...
-    std::string complexity;    // average-case Big-O, for display
+    string algorithm;     // "bubble", "selection", ...
+    string complexity;    // average-case Big-O, for display
     long long comparisons = 0;
     long long swaps = 0;       // swaps or element moves
     long long microseconds = 0;
@@ -37,23 +39,23 @@ public:
     // words: the dictionary in sorted order (Dictionary::sortedWords()).
     // limit: sort only the first `limit` words of the shuffled copy (0 = all),
     // so the O(n^2) sorts stay quick on a large word list.
-    SortingLab(const SafeArray<std::string>& words, unsigned int seed = 2513, std::size_t limit = 0);
+    SortingLab(const SafeArray<string>& words, unsigned int seed = 2513, size_t limit = 0);
 
     // Runs all seven algorithms, in the order listed above.
     SafeArray<SortRun> runAll() const;
 
-    // Runs one algorithm by name. Throws std::invalid_argument for an unknown name.
-    SortRun run(const std::string& algorithm) const;
+    // Runs one algorithm by name. Throws an error for an unknown name.
+    SortRun run(const string& algorithm) const;
 
-    std::size_t inputSize() const { return input_.size(); }
-    const SafeArray<std::string>& input() const { return input_; }
+    size_t inputSize() const { return input_.size(); }
+    const SafeArray<string>& input() const { return input_; }
 
     // The names accepted by run(), in display order.
     static const char* algorithmName(int index);
 
 private:
-    SafeArray<std::string> input_;    // shuffled
-    SafeArray<std::string> expected_; // input_ in sorted order
+    SafeArray<string> input_;    // shuffled
+    SafeArray<string> expected_; // input_ in sorted order
 };
 
 #endif // WORDLE_DSA_SORTING_LAB_H

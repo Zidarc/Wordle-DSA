@@ -3,26 +3,26 @@
 
 #include <chrono>
 #include <random>
-#include <type_traits>
 
-inline std::mt19937& shuffleGenerator()
+using namespace std;
+
+inline mt19937& shuffleGenerator()
 {
-    static std::mt19937 generator(
-        (unsigned int)std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    static mt19937 generator(
+        (unsigned int)chrono::high_resolution_clock::now().time_since_epoch().count());
     return generator;
 }
 
 // GUIDE 2.7: used by WordPicker, hint queue and SortingLab
 template <typename Arr>
-void fisherYatesWith(Arr& a, int n, std::mt19937& generator)
+void fisherYatesWith(Arr& a, int n, mt19937& generator)
 {
-    typedef typename std::decay<decltype(a[0])>::type T;
     for (int i = n - 1; i > 0; i--)
     {
-        std::uniform_int_distribution<int> pick(0, i);
+        uniform_int_distribution<int> pick(0, i);
         int j = pick(generator);
 
-        T temp = a[i];
+        auto temp = a[i];
         a[i] = a[j];
         a[j] = temp;
     }
@@ -38,7 +38,7 @@ void shuffleArray(Arr& a, int n)
 template <typename Arr>
 void shuffleArray(Arr& a, int n, unsigned int seed)
 {
-    std::mt19937 generator(seed);
+    mt19937 generator(seed);
     fisherYatesWith(a, n, generator);
 }
 

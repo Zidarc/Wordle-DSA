@@ -4,7 +4,8 @@
 #include "ds/ArrayStack.h"
 
 #include <string>
-#include <type_traits>
+
+using namespace std;
 
 // Optional counters for the Sorting Lab. Every sort takes a SortCounter*
 // that may be null; when it is not, each element comparison and each element
@@ -29,8 +30,7 @@ void sortSwap(Arr& a, int i, int j, SortCounter* counter)
 {
     if (counter)
         counter->swaps++;
-    typedef typename std::decay<decltype(a[0])>::type T;
-    T temp = a[i];
+    auto temp = a[i];
     a[i] = a[j];
     a[j] = temp;
 }
@@ -115,10 +115,9 @@ void combSort(Arr& a, int n, SortCounter* counter = nullptr)
 template <typename Arr>
 void insertionSort(Arr& a, int n, SortCounter* counter = nullptr)
 {
-    typedef typename std::decay<decltype(a[0])>::type T;
     for (int i = 1; i < n; i++)
     {
-        T value = a[i];
+        auto value = a[i];
         int j = i - 1;
         while (j >= 0 && sortLess(value, a[j], counter))
         {
@@ -175,8 +174,7 @@ void mergeSort(Arr& a, int n, SortCounter* counter = nullptr)
     if (n < 2)
         return;
 
-    typedef typename std::decay<decltype(a[0])>::type T;
-    T* temp = new T[n];
+    auto* temp = new remove_reference_t<decltype(a[0])>[n]; // temp array, same element type as a
     mergeSortRange(a, temp, 0, n - 1, counter);
     delete[] temp;
 }
@@ -211,8 +209,7 @@ int quickPartition(Arr& a, int low, int high, SortCounter* counter)
     if (sortLess(a[mid], a[high], counter))
         sortSwap(a, mid, high, counter); // now a[high] is the median of the three
 
-    typedef typename std::decay<decltype(a[0])>::type T;
-    T pivot = a[high];
+    auto pivot = a[high];
     int boundary = low; // a[low .. boundary-1] < pivot
     for (int i = low; i < high; i++)
     {
@@ -314,7 +311,7 @@ void radixSortWords(Arr& a, int n, int length = 5, SortCounter* counter = nullpt
     if (n < 2)
         return;
 
-    std::string* temp = new std::string[n];
+    string* temp = new string[n];
 
     for (int pos = length - 1; pos >= 0; pos--)
     {

@@ -19,11 +19,13 @@
 
 #include <string>
 
+using namespace std;
+
 struct GuessFeedback
 {
     static constexpr int kLength = 5;
 
-    std::string guess; // upper-case
+    string guess; // upper-case
     LetterState states[kLength] = {LetterState::Absent, LetterState::Absent, LetterState::Absent,
                                    LetterState::Absent, LetterState::Absent};
     int bstComparisons = 0; // comparisons made in the secret-letter BST, for DSA Insights
@@ -34,23 +36,23 @@ struct GuessFeedback
 class Wordle
 {
 public:
-    // Throws std::invalid_argument unless the secret is 5 letters A-Z (any case).
-    explicit Wordle(const std::string& secret);
+    // Throws an error unless the secret is 5 letters A-Z (any case).
+    explicit Wordle(const string& secret);
 
-    // Colours a guess. Throws std::invalid_argument unless it is 5 letters A-Z.
+    // Colours a guess. Throws an error unless it is 5 letters A-Z.
     // Does not check the dictionary; that is GameSession's job.
-    GuessFeedback evaluate(const std::string& guess) const;
+    GuessFeedback evaluate(const string& guess) const;
 
     // True if the letter appears anywhere in the secret word (BST lookup).
     bool containsLetter(char letter) const;
     bool containsLetter(char letter, int& comparisons) const;
 
-    const std::string& secret() const { return secret_; }
-    int distinctLetters() const { return static_cast<int>(letters_.size()); }
+    const string& secret() const { return secret_; }
+    int distinctLetters() const { return (int)(letters_.size()); }
     int letterTreeHeight() const { return letters_.height(); }
 
 private:
-    std::string secret_;
+    string secret_;
     BST<char> letters_;
 
     static char toUpper(char c);

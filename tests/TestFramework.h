@@ -20,7 +20,6 @@
 // failed and carries on, so one run reports every failure. runAll() returns
 // 0 when every test passed and 1 otherwise, which is what CTest looks at.
 
-#include <exception>
 #include <iostream>
 
 namespace tf
@@ -93,9 +92,9 @@ inline int runAll(const char* suiteName)
         {
             test.function();
         }
-        catch (const std::exception& e)
+        catch (const char* message)
         {
-            std::cout << "    unexpected exception: " << e.what() << "\n";
+            std::cout << "    unexpected error: " << message << "\n";
             ++failuresInCurrentTest();
         }
         catch (...)
@@ -151,8 +150,8 @@ inline int runAll(const char* suiteName)
         }                                                                             \
     } while (false)
 
-// Passes only if the expression throws exceptionType (or a class derived from it).
-#define CHECK_THROWS(expression, exceptionType)                                       \
+// Passes only if the expression throws an error (our code throws plain strings).
+#define CHECK_THROWS(expression)                                                      \
     do                                                                                \
     {                                                                                 \
         ++::tf::checksRun();                                                          \
@@ -161,7 +160,7 @@ inline int runAll(const char* suiteName)
         {                                                                             \
             (void)(expression);                                                       \
         }                                                                             \
-        catch (const exceptionType&)                                                  \
+        catch (const char*)                                                           \
         {                                                                             \
             tfThrewExpected = true;                                                   \
         }                                                                             \
@@ -170,7 +169,7 @@ inline int runAll(const char* suiteName)
         }                                                                             \
         if (!tfThrewExpected)                                                         \
             ::tf::reportFailure(__FILE__, __LINE__,                                   \
-                                "CHECK_THROWS(" #expression ", " #exceptionType ")"); \
+                                "CHECK_THROWS(" #expression ")");                     \
     } while (false)
 
 #endif // WORDLE_DSA_TEST_FRAMEWORK_H

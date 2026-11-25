@@ -4,7 +4,8 @@
 #include "algorithms/Sort.h"
 
 #include <chrono>
-#include <stdexcept>
+
+using namespace std;
 
 namespace
 {
@@ -14,7 +15,7 @@ const char* const kNames[SortingLab::kAlgorithmCount] = {
 const char* const kComplexity[SortingLab::kAlgorithmCount] = {
     "O(n^2)", "O(n^2)", "O(n^2)", "O(n^2 / 2^p)", "O(n log n)", "O(n log n)", "O(L(n + 26))"};
 
-int indexOfAlgorithm(const std::string& name)
+int indexOfAlgorithm(const string& name)
 {
     for (int i = 0; i < SortingLab::kAlgorithmCount; ++i)
     {
@@ -25,46 +26,46 @@ int indexOfAlgorithm(const std::string& name)
 }
 } // namespace
 
-SortingLab::SortingLab(const SafeArray<std::string>& words, unsigned int seed, std::size_t limit)
+SortingLab::SortingLab(const SafeArray<string>& words, unsigned int seed, size_t limit)
 {
-    SafeArray<std::string> shuffled(words);
-    shuffleArray(shuffled, static_cast<int>(shuffled.size()), seed);
+    SafeArray<string> shuffled(words);
+    shuffleArray(shuffled, (int)(shuffled.size()), seed);
 
-    std::size_t n = shuffled.size();
+    size_t n = shuffled.size();
     if (limit != 0 && limit < n)
         n = limit;
 
     input_.reserve(n);
-    for (std::size_t i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
         input_.pushBack(shuffled[i]);
 
     expected_ = input_;
-    mergeSort(expected_, static_cast<int>(expected_.size()));
+    mergeSort(expected_, (int)(expected_.size()));
 }
 
 const char* SortingLab::algorithmName(int index)
 {
     if (index < 0 || index >= kAlgorithmCount)
-        throw std::out_of_range("SortingLab::algorithmName: index out of range");
+        throw "SortingLab::algorithmName: index out of range";
     return kNames[index];
 }
 
 // GUIDE 2.4: copy input -> run with counter -> time -> verify
-SortRun SortingLab::run(const std::string& algorithm) const
+SortRun SortingLab::run(const string& algorithm) const
 {
     int which = indexOfAlgorithm(algorithm);
     if (which < 0)
-        throw std::invalid_argument("SortingLab: unknown algorithm '" + algorithm + "'");
+        throw "SortingLab: unknown algorithm";
 
     SortRun result;
     result.algorithm = kNames[which];
     result.complexity = kComplexity[which];
 
-    SafeArray<std::string> data(input_); // every run sorts its own copy
-    const int n = static_cast<int>(data.size());
+    SafeArray<string> data(input_); // every run sorts its own copy
+    const int n = (int)(data.size());
     SortCounter counter;
 
-    auto start = std::chrono::steady_clock::now();
+    auto start = chrono::steady_clock::now();
     switch (which)
     {
     case 0:
@@ -89,15 +90,15 @@ SortRun SortingLab::run(const std::string& algorithm) const
         radixSortWords(data, n, 5, &counter);
         break;
     }
-    auto end = std::chrono::steady_clock::now();
+    auto end = chrono::steady_clock::now();
 
     result.comparisons = counter.comparisons;
     result.swaps = counter.swaps;
     result.microseconds =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        chrono::duration_cast<chrono::microseconds>(end - start).count();
 
     result.sortedCorrectly = data.size() == expected_.size();
-    for (std::size_t i = 0; result.sortedCorrectly && i < data.size(); ++i)
+    for (size_t i = 0; result.sortedCorrectly && i < data.size(); ++i)
         result.sortedCorrectly = data[i] == expected_[i];
 
     return result;

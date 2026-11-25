@@ -14,10 +14,12 @@
 
 #include <string>
 
+using namespace std;
+
 class Board
 {
 public:
-    // Throws std::invalid_argument if rows or cols is not positive.
+    // Throws an error if rows or cols is not positive.
     explicit Board(int rows, int cols = 5);
 
     Board(const Board& other);
@@ -25,14 +27,14 @@ public:
     ~Board();
 
     // Writes a guess and its feedback into the next empty row.
-    // Throws std::logic_error if the board is full,
-    // std::invalid_argument if the guess length does not match cols().
-    void addRow(const std::string& guess, const LetterState* feedback);
+    // Throws an error if the board is full,
+    // throws an error if the guess length does not match cols().
+    void addRow(const string& guess, const LetterState* feedback);
 
-    // Throw std::out_of_range for a row or column outside the grid.
+    // Throw an error for a row or column outside the grid.
     char letterAt(int row, int col) const;
     LetterState stateAt(int row, int col) const;
-    std::string rowWord(int row) const; // empty string for a row not yet filled
+    string rowWord(int row) const; // empty string for a row not yet filled
 
     int rows() const { return rows_; }
     int cols() const { return cols_; }

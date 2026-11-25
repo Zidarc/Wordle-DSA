@@ -16,7 +16,7 @@
 // than b. The default, LessThan<T>, uses operator< (a min-heap). Passing a
 // "greater than" comparator turns it into a max-heap.
 //
-// Operations on an empty heap (top, pop, replaceTop) throw std::out_of_range.
+// Operations on an empty heap (top, pop, replaceTop) throw an error.
 //
 // Rule of Three: the only resource is the SafeArray member, which already
 // deep-copies itself, so the compiler-generated destructor, copy constructor
@@ -30,8 +30,9 @@
 #include "ds/SafeArray.h"
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 struct LessThan
@@ -52,7 +53,7 @@ public:
     explicit MinHeap(const SafeArray<T>& values)
         : data_(values)
     {
-        for (std::size_t i = data_.size() / 2; i > 0; --i)
+        for (size_t i = data_.size() / 2; i > 0; --i)
             siftDown(i - 1);
     }
 
@@ -67,8 +68,8 @@ public:
     // Removes the root (the minimum).
     void pop()
     {
-        checkNotEmpty("pop");
-        std::size_t last = data_.size() - 1;
+        checkNotEmpty();
+        size_t last = data_.size() - 1;
         data_.swapAt(0, last);
         data_.popBack();
         if (!data_.empty())
@@ -79,7 +80,7 @@ public:
     // Cheaper than pop() followed by push(): one sift instead of two.
     void replaceTop(const T& value)
     {
-        checkNotEmpty("replaceTop");
+        checkNotEmpty();
         data_[0] = value;
         siftDown(0);
     }
@@ -90,7 +91,7 @@ public:
     //   - value beats the root       -> it replaces the root
     //   - otherwise                  -> discard it
     // GUIDE 1.10 / 3.6: top-10 leaderboard trick
-    bool pushBounded(const T& value, std::size_t capacity)
+    bool pushBounded(const T& value, size_t capacity)
     {
         if (capacity == 0)
             return false;
@@ -113,11 +114,11 @@ public:
 
     const T& top() const
     {
-        checkNotEmpty("top");
+        checkNotEmpty();
         return data_[0];
     }
 
-    std::size_t size() const { return data_.size(); }
+    size_t size() const { return data_.size(); }
     bool empty() const { return data_.empty(); }
 
     // The underlying array in heap order (not sorted). Used to hand the
@@ -141,7 +142,7 @@ public:
     // True if every parent is ordered before (or equal to) its children.
     bool isValidHeap() const
     {
-        for (std::size_t i = 1; i < data_.size(); ++i)
+        for (size_t i = 1; i < data_.size(); ++i)
         {
             if (compare_(data_[i], data_[parent(i)]))
                 return false;
@@ -153,12 +154,12 @@ private:
     SafeArray<T> data_;
     Compare compare_;
 
-    static std::size_t parent(std::size_t i) { return (i - 1) / 2; }
-    static std::size_t left(std::size_t i) { return 2 * i + 1; }
-    static std::size_t right(std::size_t i) { return 2 * i + 2; }
+    static size_t parent(size_t i) { return (i - 1) / 2; }
+    static size_t left(size_t i) { return 2 * i + 1; }
+    static size_t right(size_t i) { return 2 * i + 2; }
 
     // Moves the element at i up while it is ordered before its parent.
-    void siftUp(std::size_t i)
+    void siftUp(size_t i)
     {
         while (i > 0 && compare_(data_[i], data_[parent(i)]))
         {
@@ -170,12 +171,12 @@ private:
     // Moves the element at i down, swapping with its smaller child, until
     // neither child is ordered before it.
     // GUIDE 1.10: swap with the smaller child until the heap property holds
-    void siftDown(std::size_t i)
+    void siftDown(size_t i)
     {
-        const std::size_t n = data_.size();
+        const size_t n = data_.size();
         while (true)
         {
-            std::size_t smallest = i;
+            size_t smallest = i;
             if (left(i) < n && compare_(data_[left(i)], data_[smallest]))
                 smallest = left(i);
             if (right(i) < n && compare_(data_[right(i)], data_[smallest]))
@@ -187,10 +188,10 @@ private:
         }
     }
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (data_.empty())
-            throw std::out_of_range(std::string("MinHeap::") + operation + " on an empty heap");
+            throw "MinHeap: the heap is empty";
     }
 };
 

@@ -1,6 +1,7 @@
 #include "Constraints.h"
 
-#include <stdexcept>
+using namespace std;
+
 
 Constraints::Constraints()
 {
@@ -24,16 +25,16 @@ void Constraints::reset()
 }
 
 // GUIDE 2.6: greens fix a position, grays cap a letter count
-void Constraints::add(const std::string& guess, const LetterState* feedback)
+void Constraints::add(const string& guess, const LetterState* feedback)
 {
     if (feedback == nullptr)
-        throw std::invalid_argument("Constraints::add: feedback is null");
-    if (static_cast<int>(guess.size()) != kLength)
-        throw std::invalid_argument("Constraints::add: guess must have 5 letters");
+        throw "Constraints::add: feedback is null";
+    if ((int)(guess.size()) != kLength)
+        throw "Constraints::add: guess must have 5 letters";
     for (char c : guess)
     {
         if (c < 'A' || c > 'Z')
-            throw std::invalid_argument("Constraints::add: guess must be upper-case A-Z");
+            throw "Constraints::add: guess must be upper-case A-Z";
     }
 
     int marked[kLetters] = {0}; // greens + yellows of each letter in this guess
@@ -73,9 +74,9 @@ void Constraints::add(const std::string& guess, const LetterState* feedback)
 void Constraints::addKnownLetter(int pos, char letter)
 {
     if (pos < 0 || pos >= kLength)
-        throw std::invalid_argument("Constraints::addKnownLetter: position out of range");
+        throw "Constraints::addKnownLetter: position out of range";
     if (letter < 'A' || letter > 'Z')
-        throw std::invalid_argument("Constraints::addKnownLetter: letter must be upper-case A-Z");
+        throw "Constraints::addKnownLetter: letter must be upper-case A-Z";
 
     fixed_[pos] = letter;
 
@@ -98,7 +99,7 @@ bool Constraints::allowsLetterAt(int pos, char letter) const
     return !banned_[pos][l] && maxCount_[l] > 0;
 }
 
-bool Constraints::fitsCounts(const std::string& prefix) const
+bool Constraints::fitsCounts(const string& prefix) const
 {
     int have[kLetters] = {0};
     for (char c : prefix)
@@ -112,13 +113,13 @@ bool Constraints::fitsCounts(const std::string& prefix) const
         if (have[l] < minCount_[l])
             stillNeeded += minCount_[l] - have[l];
     }
-    int remaining = kLength - static_cast<int>(prefix.size());
+    int remaining = kLength - (int)(prefix.size());
     return stillNeeded <= remaining;
 }
 
-bool Constraints::matches(const std::string& word) const
+bool Constraints::matches(const string& word) const
 {
-    if (static_cast<int>(word.size()) != kLength)
+    if ((int)(word.size()) != kLength)
         return false;
     for (int p = 0; p < kLength; ++p)
     {

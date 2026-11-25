@@ -21,7 +21,7 @@
 // copy constructor and a deep-copying copy assignment operator. A copy keeps
 // the cursor at the same position.
 //
-// Operations on an empty list throw std::out_of_range.
+// Operations on an empty list throw an error.
 //
 // Complexity:
 //   pushFront / pushBack / popFront / front / back ...... O(1)
@@ -29,8 +29,9 @@
 //   contains / removeFirst ................................ O(n)
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class CircularLinkedList
@@ -53,7 +54,7 @@ public:
     class ConstIterator
     {
     public:
-        ConstIterator(const Node* node, std::size_t remaining) : node_(node), remaining_(remaining) {}
+        ConstIterator(const Node* node, size_t remaining) : node_(node), remaining_(remaining) {}
         const T& operator*() const { return node_->data; }
         const T* operator->() const { return &node_->data; }
         ConstIterator& operator++()
@@ -69,7 +70,7 @@ public:
 
     private:
         const Node* node_;
-        std::size_t remaining_;
+        size_t remaining_;
     };
 
     // ----- construction / Rule of Three -----
@@ -125,7 +126,7 @@ public:
 
     void popFront()
     {
-        checkNotEmpty("popFront");
+        checkNotEmpty();
         Node* head = tail_->next;
 
         if (head == tail_)
@@ -152,7 +153,7 @@ public:
             return false;
 
         Node* before = tail_;
-        for (std::size_t i = 0; i < size_; ++i)
+        for (size_t i = 0; i < size_; ++i)
         {
             Node* node = before->next;
             if (node->data == value)
@@ -201,13 +202,13 @@ public:
 
     const T& front() const
     {
-        checkNotEmpty("front");
+        checkNotEmpty();
         return tail_->next->data;
     }
 
     const T& back() const
     {
-        checkNotEmpty("back");
+        checkNotEmpty();
         return tail_->data;
     }
 
@@ -226,7 +227,7 @@ public:
     // The element the cursor is on. A new list's cursor starts on the head.
     const T& current() const
     {
-        checkNotEmpty("current");
+        checkNotEmpty();
         return cursor_->data;
     }
 
@@ -235,7 +236,7 @@ public:
     // GUIDE 1.3 / 3.2: WordPicker::nextWord moves the cursor with this
     const T& advance()
     {
-        checkNotEmpty("advance");
+        checkNotEmpty();
         cursor_ = cursor_->next;
         return cursor_->data;
     }
@@ -254,7 +255,7 @@ public:
 
     // ----- queries -----
 
-    std::size_t size() const { return size_; }
+    size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
 
     ConstIterator begin() const { return ConstIterator(tail_ == nullptr ? nullptr : tail_->next, size_); }
@@ -263,7 +264,7 @@ public:
 private:
     Node* tail_;   // last node; tail_->next is the head
     Node* cursor_; // current position for rotation
-    std::size_t size_;
+    size_t size_;
 
     // Links a new node between the tail and the head. The caller decides
     // whether that node becomes the new tail (pushBack) or the new head (pushFront).
@@ -289,34 +290,26 @@ private:
         if (other.tail_ == nullptr)
             return;
 
-        try
+        size_t cursorIndex = 0;
+        const Node* node = other.tail_->next;
+        for (size_t i = 0; i < other.size_; ++i)
         {
-            std::size_t cursorIndex = 0;
-            const Node* node = other.tail_->next;
-            for (std::size_t i = 0; i < other.size_; ++i)
-            {
-                if (node == other.cursor_)
-                    cursorIndex = i;
-                pushBack(node->data);
-                node = node->next;
-            }
+            if (node == other.cursor_)
+                cursorIndex = i;
+            pushBack(node->data);
+            node = node->next;
+        }
 
-            // Put our cursor at the same position as the other list's cursor.
-            cursor_ = tail_->next;
-            for (std::size_t i = 0; i < cursorIndex; ++i)
-                cursor_ = cursor_->next;
-        }
-        catch (...)
-        {
-            clear();
-            throw;
-        }
+        // Put our cursor at the same position as the other list's cursor.
+        cursor_ = tail_->next;
+        for (size_t i = 0; i < cursorIndex; ++i)
+            cursor_ = cursor_->next;
     }
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (size_ == 0)
-            throw std::out_of_range(std::string("CircularLinkedList::") + operation + " on an empty list");
+            throw "CircularLinkedList: the list is empty";
     }
 };
 

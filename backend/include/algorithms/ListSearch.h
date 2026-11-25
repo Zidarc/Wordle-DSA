@@ -25,6 +25,8 @@
 
 #include "ds/SinglyLinkedList.h"
 
+using namespace std;
+
 struct ListSearchStats
 {
     int comparisons = 0;  // element comparisons

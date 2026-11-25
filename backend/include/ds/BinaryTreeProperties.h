@@ -26,8 +26,10 @@
 
 #include <cstddef>
 
+using namespace std;
+
 template <typename Node>
-std::size_t btCountNodes(const Node* node)
+size_t btCountNodes(const Node* node)
 {
     if (node == nullptr)
         return 0;
@@ -35,7 +37,7 @@ std::size_t btCountNodes(const Node* node)
 }
 
 template <typename Node>
-std::size_t btCountLeaves(const Node* node)
+size_t btCountLeaves(const Node* node)
 {
     if (node == nullptr)
         return 0;
@@ -46,11 +48,11 @@ std::size_t btCountLeaves(const Node* node)
 
 // Nodes with exactly one child; a full tree has none.
 template <typename Node>
-std::size_t btCountSingleChildNodes(const Node* node)
+size_t btCountSingleChildNodes(const Node* node)
 {
     if (node == nullptr)
         return 0;
-    std::size_t here = ((node->left == nullptr) != (node->right == nullptr)) ? 1 : 0;
+    size_t here = ((node->left == nullptr) != (node->right == nullptr)) ? 1 : 0;
     return here + btCountSingleChildNodes(node->left) + btCountSingleChildNodes(node->right);
 }
 
@@ -113,18 +115,18 @@ bool btIsComplete(const Node* root)
 template <typename Node>
 bool btIsPerfect(const Node* root)
 {
-    std::size_t n = btCountNodes(root);
+    size_t n = btCountNodes(root);
     int h = btHeight(root);
-    return n == (static_cast<std::size_t>(1) << h) - 1;
+    return n == ((size_t)(1) << h) - 1;
 }
 
 // Summary of all properties, for /api/dsa/trees.
 struct TreeShape
 {
-    std::size_t nodes = 0;
-    std::size_t leaves = 0;
-    std::size_t internalNodes = 0;
-    std::size_t singleChildNodes = 0;
+    size_t nodes = 0;
+    size_t leaves = 0;
+    size_t internalNodes = 0;
+    size_t singleChildNodes = 0;
     int height = 0;
     int minPossibleHeight = 0; // ceil(log2(n + 1))
     bool full = true;
@@ -141,7 +143,7 @@ TreeShape btShape(const Node* root)
     s.internalNodes = s.nodes - s.leaves;
     s.singleChildNodes = btCountSingleChildNodes(root);
     s.height = btHeight(root);
-    while ((static_cast<std::size_t>(1) << s.minPossibleHeight) - 1 < s.nodes)
+    while (((size_t)(1) << s.minPossibleHeight) - 1 < s.nodes)
         ++s.minPossibleHeight;
     s.full = btIsFull(root);
     s.complete = btIsComplete(root);

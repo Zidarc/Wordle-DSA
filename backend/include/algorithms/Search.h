@@ -3,8 +3,10 @@
 
 #include <string>
 
+using namespace std;
+
 // GUIDE 2.1: word -> base-26 number, so interpolation search has numeric keys
-inline long wordToKey(const std::string& word)
+inline long wordToKey(const string& word)
 {
     long key = 0;
     for (int i = 0; i < (int)word.length(); i++)
@@ -56,7 +58,7 @@ int binarySearch(const Arr& a, int low, int high, const T& key, int* comparisons
 // The array of words must be sorted, all words the same length and case.
 // GUIDE 2.1: estimates the position instead of taking the middle
 template <typename Arr>
-int interpolationSearch(const Arr& a, int n, const std::string& key, int* comparisons = nullptr)
+int interpolationSearch(const Arr& a, int n, const string& key, int* comparisons = nullptr)
 {
     int low = 0;
     int high = n - 1;

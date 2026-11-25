@@ -22,19 +22,20 @@
 // Rule of Three: the stack owns data_, so it defines a destructor, a deep-
 // copying copy constructor and a deep-copying copy assignment operator.
 //
-// pop / top on an empty stack throw std::out_of_range.
+// pop / top on an empty stack throw an error.
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class ArrayStack
 {
 public:
-    static constexpr std::size_t kDefaultCapacity = 8;
+    static constexpr size_t kDefaultCapacity = 8;
 
-    explicit ArrayStack(std::size_t initialCapacity = kDefaultCapacity)
+    explicit ArrayStack(size_t initialCapacity = kDefaultCapacity)
         : data_(nullptr), size_(0), capacity_(initialCapacity == 0 ? 1 : initialCapacity)
     {
         data_ = new T[capacity_];
@@ -49,7 +50,7 @@ public:
         : data_(nullptr), size_(other.size_), capacity_(other.capacity_)
     {
         data_ = new T[capacity_];
-        for (std::size_t i = 0; i < size_; ++i)
+        for (size_t i = 0; i < size_; ++i)
             data_[i] = other.data_[i];
     }
 
@@ -60,7 +61,7 @@ public:
 
         // Allocate and copy first, so *this is unchanged if new throws.
         T* copy = new T[other.capacity_];
-        for (std::size_t i = 0; i < other.size_; ++i)
+        for (size_t i = 0; i < other.size_; ++i)
             copy[i] = other.data_[i];
 
         delete[] data_;
@@ -82,50 +83,50 @@ public:
     // Removes the top element and returns it.
     T pop()
     {
-        checkNotEmpty("pop");
+        checkNotEmpty();
         --size_;
         return data_[size_];
     }
 
     T& top()
     {
-        checkNotEmpty("top");
+        checkNotEmpty();
         return data_[size_ - 1];
     }
 
     const T& top() const
     {
-        checkNotEmpty("top");
+        checkNotEmpty();
         return data_[size_ - 1];
     }
 
     const T& peek() const { return top(); }
 
     void clear() { size_ = 0; }
-    std::size_t size() const { return size_; }
-    std::size_t capacity() const { return capacity_; }
+    size_t size() const { return size_; }
+    size_t capacity() const { return capacity_; }
     bool empty() const { return size_ == 0; }
 
 private:
     T* data_;
-    std::size_t size_;
-    std::size_t capacity_;
+    size_t size_;
+    size_t capacity_;
 
     void grow()
     {
-        std::size_t newCapacity = capacity_ * 2;
+        size_t newCapacity = capacity_ * 2;
         T* bigger = new T[newCapacity];
-        for (std::size_t i = 0; i < size_; ++i)
+        for (size_t i = 0; i < size_; ++i)
             bigger[i] = data_[i];
         delete[] data_;
         data_ = bigger;
         capacity_ = newCapacity;
     }
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (size_ == 0)
-            throw std::out_of_range(std::string("ArrayStack::") + operation + " on an empty stack");
+            throw "ArrayStack: the stack is empty";
     }
 };
 

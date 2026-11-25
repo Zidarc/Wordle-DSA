@@ -44,18 +44,18 @@ TEST_CASE(wordleNormalisesTheSecret)
 
 TEST_CASE(wordleRejectsBadSecret)
 {
-    CHECK_THROWS(Wordle("CRAN"), std::invalid_argument);
-    CHECK_THROWS(Wordle("CRANES"), std::invalid_argument);
-    CHECK_THROWS(Wordle("CR4NE"), std::invalid_argument);
-    CHECK_THROWS(Wordle(""), std::invalid_argument);
+    CHECK_THROWS(Wordle("CRAN"));
+    CHECK_THROWS(Wordle("CRANES"));
+    CHECK_THROWS(Wordle("CR4NE"));
+    CHECK_THROWS(Wordle(""));
 }
 
 TEST_CASE(wordleRejectsBadGuess)
 {
     Wordle game("CRANE");
-    CHECK_THROWS(game.evaluate("CRAN"), std::invalid_argument);
-    CHECK_THROWS(game.evaluate("CRANES"), std::invalid_argument);
-    CHECK_THROWS(game.evaluate("12345"), std::invalid_argument);
+    CHECK_THROWS(game.evaluate("CRAN"));
+    CHECK_THROWS(game.evaluate("CRANES"));
+    CHECK_THROWS(game.evaluate("12345"));
 }
 
 // ===========================================================================

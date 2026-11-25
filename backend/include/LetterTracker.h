@@ -14,6 +14,8 @@
 
 #include <string>
 
+using namespace std;
+
 class LetterTracker
 {
 public:
@@ -26,11 +28,11 @@ public:
     ~LetterTracker();
 
     // Applies one guess and its feedback (both of the same length).
-    // Throws std::invalid_argument if feedback is null.
-    void update(const std::string& guess, const LetterState* feedback);
+    // Throws an error if feedback is null.
+    void update(const string& guess, const LetterState* feedback);
 
     // Status of one letter, upper or lower case.
-    // Throws std::invalid_argument for anything that is not A-Z.
+    // Throws an error for anything that is not A-Z.
     LetterState statusOf(char letter) const;
 
     // Sets every letter back to Unused (new game).

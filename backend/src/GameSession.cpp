@@ -3,7 +3,8 @@
 #include "algorithms/Shuffle.h"
 
 #include <random>
-#include <stdexcept>
+
+using namespace std;
 
 GameSession::GameSession()
     : id_(""),
@@ -21,7 +22,7 @@ GameSession::GameSession()
     initHintQueue(0);
 }
 
-GameSession::GameSession(const std::string& id, const std::string& secretWord,
+GameSession::GameSession(const string& id, const string& secretWord,
                          Difficulty difficulty, unsigned int hintSeed)
     : id_(id),
       difficulty_(difficulty),
@@ -50,7 +51,7 @@ void GameSession::initHintQueue(unsigned int seed)
     else
         shuffleArray(positions, 5);
 
-    for (std::size_t i = 0; i < positions.size(); ++i)
+    for (size_t i = 0; i < positions.size(); ++i)
         hintQueue_.enqueue(positions[i]);
 }
 
@@ -105,7 +106,7 @@ HintResult GameSession::useHint()
 }
 
 // GUIDE 3.3: the life of a guess - start reading here
-GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary& dictionary,
+GuessResult GameSession::makeGuess(const string& rawGuess, const Dictionary& dictionary,
                                    LookupMethod method)
 {
     GuessResult res;
@@ -122,7 +123,7 @@ GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary
         return res;
     }
 
-    std::string guess = Dictionary::normalize(rawGuess);
+    string guess = Dictionary::normalize(rawGuess);
     if (!Dictionary::isWellFormed(guess))
     {
         res.accepted = false;
@@ -149,9 +150,9 @@ GuessResult GameSession::makeGuess(const std::string& rawGuess, const Dictionary
             if (hintRevealed_[i] && guess[i] != wordle_.secret()[i])
             {
                 res.accepted = false;
-                res.errorMessage = std::string("Hard mode: revealed hint '") +
+                res.errorMessage = string("Hard mode: revealed hint '") +
                                    wordle_.secret()[i] + "' must be used at position " +
-                                   std::to_string(i + 1);
+                                   to_string(i + 1);
                 return res;
             }
         }

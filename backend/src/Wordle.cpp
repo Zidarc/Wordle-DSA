@@ -3,7 +3,8 @@
 #include "Dictionary.h"
 #include "algorithms/Sort.h"
 
-#include <stdexcept>
+using namespace std;
+
 
 bool GuessFeedback::isWin() const
 {
@@ -15,10 +16,10 @@ bool GuessFeedback::isWin() const
     return true;
 }
 
-Wordle::Wordle(const std::string& secret) : secret_(Dictionary::normalize(secret))
+Wordle::Wordle(const string& secret) : secret_(Dictionary::normalize(secret))
 {
     if (!Dictionary::isWellFormed(secret_))
-        throw std::invalid_argument("Wordle: the secret word must be 5 letters A-Z");
+        throw "Wordle: the secret word must be 5 letters A-Z";
 
     // Sort the letters, then insert the median first and each half's middle
     // next, so the tree is balanced (height 3). CRANE -> A C E N R gives
@@ -41,12 +42,12 @@ Wordle::Wordle(const std::string& secret) : secret_(Dictionary::normalize(secret
 }
 
 // GUIDE 3.3: two-pass colouring (greens first, then yellows / grays)
-GuessFeedback Wordle::evaluate(const std::string& guess) const
+GuessFeedback Wordle::evaluate(const string& guess) const
 {
     GuessFeedback result;
     result.guess = Dictionary::normalize(guess);
     if (!Dictionary::isWellFormed(result.guess))
-        throw std::invalid_argument("Wordle::evaluate: a guess must be 5 letters A-Z");
+        throw "Wordle::evaluate: a guess must be 5 letters A-Z";
 
     // Unused count of each letter in the secret word, after the greens.
     int remaining[26] = {0};
@@ -96,6 +97,6 @@ bool Wordle::containsLetter(char letter, int& comparisons) const
 char Wordle::toUpper(char c)
 {
     if (c >= 'a' && c <= 'z')
-        return static_cast<char>(c - 'a' + 'A');
+        return (char)(c - 'a' + 'A');
     return c;
 }

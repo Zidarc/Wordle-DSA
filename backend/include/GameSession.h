@@ -18,6 +18,8 @@
 
 #include <string>
 
+using namespace std;
+
 enum class GameStatus
 {
     Playing = 0,
@@ -39,7 +41,7 @@ inline const char* toString(GameStatus status)
     }
 }
 
-inline std::ostream& operator<<(std::ostream& os, GameStatus s)
+inline ostream& operator<<(ostream& os, GameStatus s)
 {
     return os << toString(s);
 }
@@ -51,13 +53,13 @@ struct HintResult
     char letter = '\0';
     int hintsUsed = 0;
     int penalty = 0;
-    std::string message;
+    string message;
 };
 
 struct GuessResult
 {
     bool accepted = false;
-    std::string errorMessage;
+    string errorMessage;
     GuessFeedback feedback;
     LookupStats lookupStats;
     LookupMethod methodUsed = LookupMethod::Hash; // the lookup that decided "in the word list?"
@@ -71,10 +73,10 @@ class GameSession
 {
 public:
     GameSession();
-    GameSession(const std::string& id, const std::string& secretWord,
+    GameSession(const string& id, const string& secretWord,
                 Difficulty difficulty = Difficulty::Normal, unsigned int hintSeed = 0);
 
-    const std::string& id() const { return id_; }
+    const string& id() const { return id_; }
     Difficulty difficulty() const { return difficulty_; }
     GameStatus status() const { return status_; }
     bool isGameOver() const { return status_ != GameStatus::Playing; }
@@ -90,27 +92,27 @@ public:
     // saving, so the same win cannot be posted again and again.
     bool scoreSaved() const { return scoreSaved_; }
     void markScoreSaved() { scoreSaved_ = true; }
-    const std::string& secretWord() const { return wordle_.secret(); }
+    const string& secretWord() const { return wordle_.secret(); }
 
     const Board& board() const { return board_; }
     const LetterTracker& tracker() const { return tracker_; }
-    const Stack<std::string>& history() const { return history_; }
+    const Stack<string>& history() const { return history_; }
     const DoublyLinkedList<GuessFeedback>& replay() const { return replay_; }
 
     // Validates the guess with the chosen lookup method (hash table by
     // default), then colours it. All six methods still run for the stats.
-    GuessResult makeGuess(const std::string& rawGuess, const Dictionary& dictionary,
+    GuessResult makeGuess(const string& rawGuess, const Dictionary& dictionary,
                           LookupMethod method = LookupMethod::Hash);
     HintResult useHint();
 
 private:
-    std::string id_;
+    string id_;
     Difficulty difficulty_;
     int maxAttempts_;
     Wordle wordle_;
     Board board_;
     LetterTracker tracker_;
-    Stack<std::string> history_;
+    Stack<string> history_;
     Queue<int> hintQueue_;
     DoublyLinkedList<GuessFeedback> replay_;
     int hintsUsed_;

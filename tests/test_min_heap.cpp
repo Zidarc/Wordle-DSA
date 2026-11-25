@@ -50,9 +50,9 @@ TEST_CASE(minHeapDefaultConstructedIsEmpty)
 TEST_CASE(minHeapEmptyOperationsThrow)
 {
     MinHeap<int> heap;
-    CHECK_THROWS(heap.top(), std::out_of_range);
-    CHECK_THROWS(heap.pop(), std::out_of_range);
-    CHECK_THROWS(heap.replaceTop(1), std::out_of_range);
+    CHECK_THROWS(heap.top());
+    CHECK_THROWS(heap.pop());
+    CHECK_THROWS(heap.replaceTop(1));
 }
 
 // ===========================================================================

@@ -3,6 +3,8 @@
 
 #include <string>
 
+using namespace std;
+
 // KMP string search. Used to search the leaderboard by part of a player's name.
 // An empty pattern matches at index 0 for kmpSearch and counts as 0 matches.
 
@@ -16,7 +18,7 @@ inline char kmpChar(char c, bool ignoreCase)
 // lps[i] = length of the longest proper prefix of pattern[0..i]
 // that is also a suffix of it. lps must have room for pattern.length() ints.
 // GUIDE 2.7: LPS table = where to resume after a mismatch
-inline void buildLps(const std::string& pattern, int* lps, bool ignoreCase = false)
+inline void buildLps(const string& pattern, int* lps, bool ignoreCase = false)
 {
     int m = (int)pattern.length();
     if (m == 0)
@@ -46,7 +48,7 @@ inline void buildLps(const std::string& pattern, int* lps, bool ignoreCase = fal
 }
 
 // Returns the index of the first match, or -1. comparisons is optional.
-inline int kmpSearch(const std::string& text, const std::string& pattern,
+inline int kmpSearch(const string& text, const string& pattern,
                      int* comparisons = nullptr, bool ignoreCase = false)
 {
     int n = (int)text.length();
@@ -91,13 +93,13 @@ inline int kmpSearch(const std::string& text, const std::string& pattern,
     return result;
 }
 
-inline bool kmpContains(const std::string& text, const std::string& pattern, bool ignoreCase = false)
+inline bool kmpContains(const string& text, const string& pattern, bool ignoreCase = false)
 {
     return kmpSearch(text, pattern, nullptr, ignoreCase) != -1;
 }
 
 // Counts all matches, including overlapping ones ("AA" in "AAAAA" is 4).
-inline int kmpCountMatches(const std::string& text, const std::string& pattern, bool ignoreCase = false)
+inline int kmpCountMatches(const string& text, const string& pattern, bool ignoreCase = false)
 {
     int n = (int)text.length();
     int m = (int)pattern.length();

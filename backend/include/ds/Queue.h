@@ -14,15 +14,16 @@
 // compiler-generated destructor, copy constructor and copy assignment are
 // correct. They are declared explicitly below to show this is deliberate.
 //
-// dequeue / front / back on an empty queue throw std::out_of_range.
+// dequeue / front / back on an empty queue throw an error.
 //
 // Complexity: enqueue, dequeue, front, back, size, empty are all O(1).
 
 #include "ds/SinglyLinkedList.h"
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class Queue
@@ -44,7 +45,7 @@ public:
     // Removes the front element and returns it.
     T dequeue()
     {
-        checkNotEmpty("dequeue");
+        checkNotEmpty();
         T value = list_.front();
         list_.popFront();
         return value;
@@ -52,30 +53,30 @@ public:
 
     T& front()
     {
-        checkNotEmpty("front");
+        checkNotEmpty();
         return list_.front();
     }
 
     const T& front() const
     {
-        checkNotEmpty("front");
+        checkNotEmpty();
         return list_.front();
     }
 
     T& back()
     {
-        checkNotEmpty("back");
+        checkNotEmpty();
         return list_.back();
     }
 
     const T& back() const
     {
-        checkNotEmpty("back");
+        checkNotEmpty();
         return list_.back();
     }
 
     void clear() { list_.clear(); }
-    std::size_t size() const { return list_.size(); }
+    size_t size() const { return list_.size(); }
     bool empty() const { return list_.empty(); }
 
     // Iterates from the front of the queue to the back, without removing anything.
@@ -85,10 +86,10 @@ public:
 private:
     SinglyLinkedList<T> list_;
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (list_.empty())
-            throw std::out_of_range(std::string("Queue::") + operation + " on an empty queue");
+            throw "Queue: the queue is empty";
     }
 };
 

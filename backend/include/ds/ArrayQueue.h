@@ -25,21 +25,22 @@
 // Rule of Three: the queue owns data_, so it defines a destructor, a deep-
 // copying copy constructor and a deep-copying copy assignment operator.
 //
-// dequeue / front / back on an empty queue throw std::out_of_range.
+// dequeue / front / back on an empty queue throw an error.
 //
 // Complexity: enqueue O(1) amortised, dequeue / front / back / at O(1).
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class ArrayQueue
 {
 public:
-    static constexpr std::size_t kDefaultCapacity = 8;
+    static constexpr size_t kDefaultCapacity = 8;
 
-    explicit ArrayQueue(std::size_t capacity = kDefaultCapacity, bool makeBounded = false)
+    explicit ArrayQueue(size_t capacity = kDefaultCapacity, bool makeBounded = false)
         : data_(nullptr),
           front_(0),
           size_(0),
@@ -104,7 +105,7 @@ public:
     // Removes the front element and returns it.
     T dequeue()
     {
-        checkNotEmpty("dequeue");
+        checkNotEmpty();
         T value = data_[front_];
         front_ = (front_ + 1) % capacity_;
         --size_;
@@ -113,22 +114,21 @@ public:
 
     const T& front() const
     {
-        checkNotEmpty("front");
+        checkNotEmpty();
         return data_[front_];
     }
 
     const T& back() const
     {
-        checkNotEmpty("back");
+        checkNotEmpty();
         return data_[(front_ + size_ - 1) % capacity_];
     }
 
-    // Element i places behind the front (0 = front). Throws std::out_of_range.
-    const T& at(std::size_t i) const
+    // Element i places behind the front (0 = front). Throws an error.
+    const T& at(size_t i) const
     {
         if (i >= size_)
-            throw std::out_of_range("ArrayQueue::at: index " + std::to_string(i) +
-                                    " out of range (size " + std::to_string(size_) + ")");
+            throw "ArrayQueue: index out of range";
         return data_[(front_ + i) % capacity_];
     }
 
@@ -138,27 +138,27 @@ public:
         size_ = 0;
     }
 
-    std::size_t size() const { return size_; }
-    std::size_t capacity() const { return capacity_; }
+    size_t size() const { return size_; }
+    size_t capacity() const { return capacity_; }
     bool empty() const { return size_ == 0; }
     bool full() const { return size_ == capacity_; }
     bool bounded() const { return bounded_; }
 
     // Raw array slot of the front element; lets the tests see the wrap-around.
-    std::size_t frontIndex() const { return front_; }
+    size_t frontIndex() const { return front_; }
 
 private:
     T* data_;
-    std::size_t front_;
-    std::size_t size_;
-    std::size_t capacity_;
+    size_t front_;
+    size_t size_;
+    size_t capacity_;
     bool bounded_;
 
     void grow()
     {
-        std::size_t newCapacity = capacity_ * 2;
+        size_t newCapacity = capacity_ * 2;
         T* bigger = new T[newCapacity];
-        for (std::size_t i = 0; i < size_; ++i)
+        for (size_t i = 0; i < size_; ++i)
             bigger[i] = data_[(front_ + i) % capacity_];
         delete[] data_;
         data_ = bigger;
@@ -169,16 +169,16 @@ private:
     // Copies other's elements in queue order, starting at slot 0.
     void copyElementsFrom(const ArrayQueue& other)
     {
-        for (std::size_t i = 0; i < other.size_; ++i)
+        for (size_t i = 0; i < other.size_; ++i)
             data_[i] = other.data_[(other.front_ + i) % other.capacity_];
         front_ = 0;
         size_ = other.size_;
     }
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (size_ == 0)
-            throw std::out_of_range(std::string("ArrayQueue::") + operation + " on an empty queue");
+            throw "ArrayQueue: the queue is empty";
     }
 };
 

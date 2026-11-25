@@ -1,12 +1,13 @@
 #include "Board.h"
 
-#include <stdexcept>
+using namespace std;
+
 
 Board::Board(int rows, int cols)
     : rows_(rows), cols_(cols), filledRows_(0), letters_(nullptr), states_(nullptr)
 {
     if (rows <= 0 || cols <= 0)
-        throw std::invalid_argument("Board: rows and cols must be positive");
+        throw "Board: rows and cols must be positive";
     allocate();
 }
 
@@ -41,14 +42,14 @@ Board::~Board()
 // Rows
 // ---------------------------------------------------------------------------
 
-void Board::addRow(const std::string& guess, const LetterState* feedback)
+void Board::addRow(const string& guess, const LetterState* feedback)
 {
     if (isFull())
-        throw std::logic_error("Board::addRow: the board is full");
-    if (static_cast<int>(guess.size()) != cols_)
-        throw std::invalid_argument("Board::addRow: guess length does not match the board width");
+        throw "Board::addRow: the board is full";
+    if ((int)(guess.size()) != cols_)
+        throw "Board::addRow: guess length does not match the board width";
     if (feedback == nullptr)
-        throw std::invalid_argument("Board::addRow: feedback is null");
+        throw "Board::addRow: feedback is null";
 
     for (int col = 0; col < cols_; ++col)
     {
@@ -70,12 +71,12 @@ LetterState Board::stateAt(int row, int col) const
     return states_[row][col];
 }
 
-std::string Board::rowWord(int row) const
+string Board::rowWord(int row) const
 {
     checkCell(row, 0);
     if (row >= filledRows_)
         return "";
-    return std::string(letters_[row], static_cast<std::size_t>(cols_));
+    return string(letters_[row], (size_t)(cols_));
 }
 
 // ---------------------------------------------------------------------------
@@ -132,6 +133,5 @@ void Board::copyCellsFrom(const Board& other)
 void Board::checkCell(int row, int col) const
 {
     if (row < 0 || row >= rows_ || col < 0 || col >= cols_)
-        throw std::out_of_range("Board: cell (" + std::to_string(row) + ", " +
-                                std::to_string(col) + ") is outside the grid");
+        throw "Board: cell is outside the grid";
 }

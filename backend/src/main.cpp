@@ -6,15 +6,17 @@
 
 #include <iostream>
 
+using namespace std;
+
 // GUIDE 3.1: startup - read Server::Server next
 int main()
 {
-    std::cout << "========================================\n";
-    std::cout << "       Wordle-DSA C++ REST Server       \n";
-    std::cout << "========================================\n";
+    cout << "========================================\n";
+    cout << "       Wordle-DSA C++ REST Server       \n";
+    cout << "========================================\n";
 
     Server server("data/words.txt", "data/scores.txt");
-    std::cout << "Server starting on http://localhost:8080 ...\n";
+    cout << "Server starting on http://localhost:8080 ...\n";
     server.listen("0.0.0.0", 8080);
 
     return 0;

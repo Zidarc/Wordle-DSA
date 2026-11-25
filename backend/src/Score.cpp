@@ -1,5 +1,7 @@
 #include "Score.h"
 
+using namespace std;
+
 int Score::calculate(int maxAttempts, int attemptsUsed, int hintsUsed, Difficulty difficulty, bool won)
 {
     return calculate(maxAttempts, attemptsUsed, hintsUsed, scoreMultiplier(difficulty), won);
@@ -17,6 +19,6 @@ int Score::calculate(int maxAttempts, int attemptsUsed, int hintsUsed, double mu
     if (raw < 0)
         raw = 0;
 
-    int finalScore = static_cast<int>(raw * multiplier);
+    int finalScore = (int)(raw * multiplier);
     return finalScore < 0 ? 0 : finalScore;
 }

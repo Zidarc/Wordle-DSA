@@ -55,7 +55,7 @@ TEST_CASE(dictionaryLoadsTheRealWordList)
 TEST_CASE(dictionaryMissingFileThrows)
 {
     Dictionary dictionary;
-    CHECK_THROWS(dictionary.loadFromFile("does/not/exist/words.txt"), std::runtime_error);
+    CHECK_THROWS(dictionary.loadFromFile("does/not/exist/words.txt"));
     CHECK(dictionary.empty());
 }
 
@@ -63,7 +63,7 @@ TEST_CASE(dictionaryEmptyInputThrows)
 {
     std::istringstream input("");
     Dictionary dictionary;
-    CHECK_THROWS(dictionary.loadFromStream(input), std::runtime_error);
+    CHECK_THROWS(dictionary.loadFromStream(input));
     CHECK(dictionary.empty());
 }
 
@@ -71,7 +71,7 @@ TEST_CASE(dictionaryInputWithNoValidWordThrows)
 {
     std::istringstream input("cat\nelephant\n12345\nab-cd\n\n");
     Dictionary dictionary;
-    CHECK_THROWS(dictionary.loadFromStream(input), std::runtime_error);
+    CHECK_THROWS(dictionary.loadFromStream(input));
 }
 
 TEST_CASE(dictionarySkipsBadLinesAndDuplicates)
@@ -215,7 +215,7 @@ TEST_CASE(dictionaryMethodNamesAndComplexity)
     CHECK(m == LookupMethod::Linear); // unchanged
     CHECK_EQ(std::string(Dictionary::methodInfo(LookupMethod::Binary).timeAvg), std::string("O(log n)"));
     CHECK_EQ(std::string(Dictionary::methodInfo(LookupMethod::Hash).key), std::string("hash"));
-    CHECK_THROWS(Dictionary::methodInfo(6), std::out_of_range);
+    CHECK_THROWS(Dictionary::methodInfo(6));
 }
 
 TEST_CASE(dictionaryBTreeMatchesSortedArray)
@@ -325,7 +325,7 @@ TEST_CASE(wordPickerEmptyListThrows)
 {
     SafeArray<std::string> none;
     WordPicker picker(none, 1u);
-    CHECK_THROWS(picker.nextWord(), std::logic_error);
+    CHECK_THROWS(picker.nextWord());
 }
 
 int main()

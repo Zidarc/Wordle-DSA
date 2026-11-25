@@ -1,6 +1,7 @@
 #include "LetterTracker.h"
 
-#include <stdexcept>
+using namespace std;
+
 
 namespace
 {
@@ -39,18 +40,18 @@ LetterTracker::~LetterTracker()
 // ---------------------------------------------------------------------------
 
 // GUIDE 1.11: direct addressing status_[letter - 'A'], only upgrades
-void LetterTracker::update(const std::string& guess, const LetterState* feedback)
+void LetterTracker::update(const string& guess, const LetterState* feedback)
 {
     if (feedback == nullptr)
-        throw std::invalid_argument("LetterTracker::update: feedback is null");
+        throw "LetterTracker::update: feedback is null";
 
-    for (std::size_t i = 0; i < guess.size(); ++i)
+    for (size_t i = 0; i < guess.size(); ++i)
     {
         int index = indexOf(guess[i]);
         if (index < 0)
             continue;
         // Only upgrade, never downgrade.
-        if (static_cast<int>(feedback[i]) > static_cast<int>(status_[index]))
+        if ((int)(feedback[i]) > (int)(status_[index]))
             status_[index] = feedback[i];
     }
 }
@@ -59,7 +60,7 @@ LetterState LetterTracker::statusOf(char letter) const
 {
     int index = indexOf(letter);
     if (index < 0)
-        throw std::invalid_argument(std::string("LetterTracker: '") + letter + "' is not a letter");
+        throw "LetterTracker: not a letter";
     return status_[index];
 }
 
@@ -105,7 +106,7 @@ void LetterTracker::buildKeyboard()
     rowLengths_ = new int[kKeyboardRows];
     for (int row = 0; row < kKeyboardRows; ++row)
     {
-        int length = static_cast<int>(std::string(kKeyboardLayout[row]).size());
+        int length = (int)(string(kKeyboardLayout[row]).size());
         rowLengths_[row] = length;
         keyRows_[row] = new char[length]; // each row has its own length
         for (int i = 0; i < length; ++i)
@@ -135,6 +136,5 @@ void LetterTracker::copyFrom(const LetterTracker& other)
 void LetterTracker::checkKey(int row, int index) const
 {
     if (row < 0 || row >= kKeyboardRows || index < 0 || index >= rowLengths_[row])
-        throw std::out_of_range("LetterTracker: key (" + std::to_string(row) + ", " +
-                                std::to_string(index) + ") is outside the keyboard");
+        throw "LetterTracker: key is outside the keyboard";
 }

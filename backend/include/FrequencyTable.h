@@ -18,6 +18,8 @@
 
 #include <string>
 
+using namespace std;
+
 class FrequencyTable
 {
 public:
@@ -30,14 +32,14 @@ public:
     ~FrequencyTable();
 
     // Clears the table, then counts every word (upper-case, 5 letters A-Z).
-    void build(const SafeArray<std::string>& words);
-    void build(const SinglyLinkedList<std::string>& words);
+    void build(const SafeArray<string>& words);
+    void build(const SinglyLinkedList<string>& words);
 
     // Adds one word to the counts. Words that are not 5 letters A-Z are skipped.
-    void add(const std::string& word);
+    void add(const string& word);
     void clear();
 
-    // Throw std::out_of_range for a position outside 0-4 or a non-letter.
+    // Throw an error for a position outside 0-4 or a non-letter.
     int countAt(int position, char letter) const;
     int wordsContaining(char letter) const;
     int wordCount() const { return wordCount_; }
@@ -46,7 +48,7 @@ public:
     // there, plus, for each distinct letter, how many words contain it.
     // Repeated letters only score once, so words that test five different
     // letters rank higher.
-    long long score(const std::string& word) const;
+    long long score(const string& word) const;
 
 private:
     int** counts_;

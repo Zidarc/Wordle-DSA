@@ -21,6 +21,8 @@
 
 #include <string>
 
+using namespace std;
+
 class Constraints
 {
 public:
@@ -31,13 +33,13 @@ public:
     Constraints();
 
     // Adds one guess (5 letters A-Z, upper-case) and its feedback.
-    // Throws std::invalid_argument for a malformed guess or null feedback.
-    void add(const std::string& guess, const LetterState* feedback);
+    // Throws an error for a malformed guess or null feedback.
+    void add(const string& guess, const LetterState* feedback);
     void reset();
 
     // A revealed hint: `letter` is known to be at `pos` (like a green that
     // came from no guess). Raises the letter's minimum count to the number
-    // of fixed positions holding it. Throws std::invalid_argument for a bad
+    // of fixed positions holding it. Throws an error for a bad
     // position or letter.
     void addKnownLetter(int pos, char letter);
 
@@ -47,10 +49,10 @@ public:
     // Can a word that starts with `prefix` still meet the letter counts?
     // Too many of a letter fails at once; too few fails only if the
     // remaining positions are not enough to make up the difference.
-    bool fitsCounts(const std::string& prefix) const;
+    bool fitsCounts(const string& prefix) const;
 
     // Does a whole 5-letter word agree with every guess so far?
-    bool matches(const std::string& word) const;
+    bool matches(const string& word) const;
 
     char fixedAt(int pos) const { return fixed_[pos]; }
     int minCount(char letter) const { return minCount_[letter - 'A']; }

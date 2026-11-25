@@ -1,16 +1,19 @@
-#include "Server.h"
-
-#include "Solver.h"
-#include "SortingLab.h"
-
+// The HTTP and JSON libraries come first: they include Windows headers that
+// must be read before our "using namespace std;".
 #include "httplib.h"
 #include "json.hpp"
+
+#include "Server.h"
+#include "Solver.h"
+#include "SortingLab.h"
 
 #include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+
+using namespace std;
 
 using json = nlohmann::json;
 
@@ -24,19 +27,19 @@ void setCors(httplib::Response& res)
     res.set_header("Access-Control-Allow-Headers", "Content-Type");
 }
 
-std::string currentDate()
+string currentDate()
 {
-    auto now = std::chrono::system_clock::now();
-    std::time_t t = std::chrono::system_clock::to_time_t(now);
-    std::tm tm;
+    auto now = chrono::system_clock::now();
+    time_t t = chrono::system_clock::to_time_t(now);
+    tm tm;
 #if defined(_WIN32)
     localtime_s(&tm, &t);
 #else
     localtime_r(&t, &tm);
 #endif
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%d", &tm);
-    return std::string(buf);
+    strftime(buf, sizeof(buf), "%Y-%m-%d", &tm);
+    return string(buf);
 }
 
 // One row per lookup method: answer, comparisons, time and Big-O.
@@ -80,34 +83,34 @@ void replayInto(Solver& solver, const GameSession& session)
 
 } // namespace
 
-Server::Server(const std::string& wordsPath, const std::string& scoresPath)
+Server::Server(const string& wordsPath, const string& scoresPath)
     : leaderboard_(scoresPath),
-      http_(std::make_unique<httplib::Server>()),
+      http_(make_unique<httplib::Server>()),
       gameCounter_(0)
 {
     try
     {
         dictionary_.loadFromFile(wordsPath);
-        std::cout << "[Server] Loaded dictionary with " << dictionary_.size() << " words.\n";
+        cout << "[Server] Loaded dictionary with " << dictionary_.size() << " words.\n";
     }
-    catch (const std::exception& e)
+    catch (const char* message)
     {
-        std::cerr << "[Server] Warning: failed to load dictionary: " << e.what() << "\n";
+        cerr << "[Server] Warning: failed to load dictionary: " << message << "\n";
     }
 
     if (!dictionary_.empty())
-        picker_ = std::make_unique<WordPicker>(dictionary_.sortedWords());
+        picker_ = make_unique<WordPicker>(dictionary_.sortedWords());
 
     setupRoutes();
 }
 
 Server::~Server() = default;
 
-std::string Server::generateGameId()
+string Server::generateGameId()
 {
     ++gameCounter_;
-    auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-    return "game-" + std::to_string(gameCounter_) + "-" + std::to_string(now % 1000000);
+    auto now = chrono::steady_clock::now().time_since_epoch().count();
+    return "game-" + to_string(gameCounter_) + "-" + to_string(now % 1000000);
 }
 
 void Server::setupRoutes()
@@ -122,7 +125,7 @@ void Server::setupRoutes()
     // GUIDE 3.2: new game route
     http_->Post("/api/game/new", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
+        lock_guard<mutex> lock(mutex_);
         if (!picker_)
         {
             res.status = 500;
@@ -130,7 +133,7 @@ void Server::setupRoutes()
             return;
         }
 
-        std::string diffStr = "normal";
+        string diffStr = "normal";
         if (!req.body.empty())
         {
             try
@@ -145,8 +148,8 @@ void Server::setupRoutes()
         }
 
         Difficulty diff = difficultyFromString(diffStr);
-        std::string gameId = generateGameId();
-        std::string secret = picker_->nextWord();
+        string gameId = generateGameId();
+        string secret = picker_->nextWord();
 
         GameSession session(gameId, secret, diff);
         sessions_.insert(gameId, session);
@@ -166,8 +169,8 @@ void Server::setupRoutes()
     // GUIDE 3.3: guess route -> GameSession::makeGuess
     http_->Post("/api/game/guess", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string gameId, guess, methodName;
+        lock_guard<mutex> lock(mutex_);
+        string gameId, guess, methodName;
         try
         {
             auto body = json::parse(req.body);
@@ -243,7 +246,7 @@ void Server::setupRoutes()
         {
             json row = json::array();
             for (int c = 0; c < tracker.keyboardRowLength(r); ++c)
-                row.push_back(std::string(1, tracker.keyAt(r, c)));
+                row.push_back(string(1, tracker.keyAt(r, c)));
             keyboard.push_back(row);
         }
         reply["keyboard"] = keyboard;
@@ -254,7 +257,7 @@ void Server::setupRoutes()
         {
             LetterState state = tracker.statusOf(c);
             if (state != LetterState::Unused)
-                letterStatus[std::string(1, c)] = toString(state);
+                letterStatus[string(1, c)] = toString(state);
         }
         reply["letterStatus"] = letterStatus;
 
@@ -289,8 +292,8 @@ void Server::setupRoutes()
     // POST /api/game/hint
     http_->Post("/api/game/hint", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string gameId;
+        lock_guard<mutex> lock(mutex_);
+        string gameId;
         try
         {
             auto body = json::parse(req.body);
@@ -321,7 +324,7 @@ void Server::setupRoutes()
 
         json reply = {
             {"position", hint.position},
-            {"letter", std::string(1, hint.letter)},
+            {"letter", string(1, hint.letter)},
             {"hintsUsed", hint.hintsUsed},
             {"penalty", hint.penalty},
             {"message", hint.message}
@@ -334,8 +337,8 @@ void Server::setupRoutes()
     // GET /api/game/history?gameId=...
     http_->Get("/api/game/history", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string gameId = req.get_param_value("gameId");
+        lock_guard<mutex> lock(mutex_);
+        string gameId = req.get_param_value("gameId");
         GameSession* session = sessions_.find(gameId);
         if (!session)
         {
@@ -345,7 +348,7 @@ void Server::setupRoutes()
         }
 
         json history = json::array();
-        for (const std::string& word : session->history())
+        for (const string& word : session->history())
             history.push_back(word);
 
         json reply = {
@@ -360,8 +363,8 @@ void Server::setupRoutes()
     // GET /api/game/replay?gameId=...
     http_->Get("/api/game/replay", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string gameId = req.get_param_value("gameId");
+        lock_guard<mutex> lock(mutex_);
+        string gameId = req.get_param_value("gameId");
         GameSession* session = sessions_.find(gameId);
         if (!session)
         {
@@ -407,15 +410,15 @@ void Server::setupRoutes()
     // GET /api/leaderboard?search=...
     http_->Get("/api/leaderboard", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string query = req.get_param_value("search");
+        lock_guard<mutex> lock(mutex_);
+        string query = req.get_param_value("search");
         SafeArray<LeaderboardEntry> top = leaderboard_.topScores(query);
 
         json list = json::array();
-        for (std::size_t i = 0; i < top.size(); ++i)
+        for (size_t i = 0; i < top.size(); ++i)
         {
             list.push_back({
-                {"rank", static_cast<int>(i + 1)},
+                {"rank", (int)(i + 1)},
                 {"name", top[i].name},
                 {"score", top[i].score},
                 {"difficulty", top[i].difficulty},
@@ -430,8 +433,8 @@ void Server::setupRoutes()
     // POST /api/leaderboard
     http_->Post("/api/leaderboard", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string gameId, name;
+        lock_guard<mutex> lock(mutex_);
+        string gameId, name;
         try
         {
             auto body = json::parse(req.body);
@@ -467,7 +470,7 @@ void Server::setupRoutes()
             return;
         }
 
-        std::string today = currentDate();
+        string today = currentDate();
         name = Leaderboard::cleanName(name);
         if (!leaderboard_.addScore(name, session->score(), toString(session->difficulty()), today))
         {
@@ -490,7 +493,7 @@ void Server::setupRoutes()
     // GET /api/dsa/stats
     http_->Get("/api/dsa/stats", [this](const httplib::Request&, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
+        lock_guard<mutex> lock(mutex_);
         DictionaryStats s = dictionary_.stats();
         json reply = {
             {"wordCount", s.wordCount},
@@ -522,8 +525,8 @@ void Server::setupDsaRoutes()
     // and the top suggestions ranked with quick sort.
     http_->Get("/api/game/solver", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string gameId = req.get_param_value("gameId");
+        lock_guard<mutex> lock(mutex_);
+        string gameId = req.get_param_value("gameId");
         GameSession* session = sessions_.find(gameId);
         if (!session)
         {
@@ -532,12 +535,12 @@ void Server::setupDsaRoutes()
             return;
         }
 
-        std::size_t count = 5;
+        size_t count = 5;
         if (req.has_param("count"))
         {
             try
             {
-                count = static_cast<std::size_t>(std::stoul(req.get_param_value("count")));
+                count = (size_t)(stoul(req.get_param_value("count")));
             }
             catch (...)
             {
@@ -566,7 +569,7 @@ void Server::setupDsaRoutes()
         if (session->isGameOver() || session->attemptsUsed() >= 2)
         {
             SafeArray<RankedWord> top = solver.suggestions(count);
-            for (std::size_t i = 0; i < top.size(); ++i)
+            for (size_t i = 0; i < top.size(); ++i)
                 suggestions.push_back({{"word", top[i].word}, {"score", top[i].score}});
         }
 
@@ -586,8 +589,8 @@ void Server::setupDsaRoutes()
     // comparisons, average time in ns, and time / space complexity.
     http_->Get("/api/dsa/lookup", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::string word = req.get_param_value("word");
+        lock_guard<mutex> lock(mutex_);
+        string word = req.get_param_value("word");
         LookupMethod method = LookupMethod::Hash;
         if (req.has_param("method") && !Dictionary::methodFromString(req.get_param_value("method"), method))
         {
@@ -617,9 +620,9 @@ void Server::setupDsaRoutes()
     // The last 10 finished games, most recent first (circular ArrayQueue).
     http_->Get("/api/games/recent", [this](const httplib::Request&, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
+        lock_guard<mutex> lock(mutex_);
         json list = json::array();
-        for (std::size_t i = recentGames_.size(); i > 0; --i)
+        for (size_t i = recentGames_.size(); i > 0; --i)
         {
             const RecentGame& g = recentGames_.at(i - 1);
             list.push_back({{"gameId", g.gameId},
@@ -637,13 +640,13 @@ void Server::setupDsaRoutes()
     // Sorting Lab: seven sorts on the same shuffled copy of the dictionary.
     http_->Get("/api/dsa/sort", [this](const httplib::Request& req, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::size_t limit = 0;
+        lock_guard<mutex> lock(mutex_);
+        size_t limit = 0;
         if (req.has_param("limit"))
         {
             try
             {
-                limit = static_cast<std::size_t>(std::stoul(req.get_param_value("limit")));
+                limit = (size_t)(stoul(req.get_param_value("limit")));
             }
             catch (...)
             {
@@ -653,7 +656,7 @@ void Server::setupDsaRoutes()
         SortingLab lab(dictionary_.sortedWords(), 2513, limit);
         SafeArray<SortRun> runs = lab.runAll();
         json list = json::array();
-        for (std::size_t i = 0; i < runs.size(); ++i)
+        for (size_t i = 0; i < runs.size(); ++i)
         {
             list.push_back({{"algorithm", runs[i].algorithm},
                             {"complexity", runs[i].complexity},
@@ -671,9 +674,9 @@ void Server::setupDsaRoutes()
     // Binary tree properties of the dictionary's AVL tree and the B-tree.
     http_->Get("/api/dsa/trees", [this](const httplib::Request&, httplib::Response& res) {
         setCors(res);
-        std::lock_guard<std::mutex> lock(mutex_);
+        lock_guard<mutex> lock(mutex_);
         TreeShape avl = dictionary_.avlShape();
-        const BTree<std::string>& bt = dictionary_.btree();
+        const BTree<string>& bt = dictionary_.btree();
         json reply = {
             {"avl", {{"nodes", avl.nodes},
                      {"leaves", avl.leaves},
@@ -695,9 +698,9 @@ void Server::setupDsaRoutes()
     });
 }
 
-bool Server::listen(const std::string& host, int port)
+bool Server::listen(const string& host, int port)
 {
-    std::cout << "[Server] Wordle-DSA HTTP Server listening on http://" << host << ":" << port << "\n";
+    cout << "[Server] Wordle-DSA HTTP Server listening on http://" << host << ":" << port << "\n";
     return http_->listen(host, port);
 }
 

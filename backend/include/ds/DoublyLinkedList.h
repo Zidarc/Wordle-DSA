@@ -11,7 +11,7 @@
 // Rule of Three: the list owns its nodes, so it defines a destructor, a deep-copying
 // copy constructor and a deep-copying copy assignment operator.
 //
-// Operations on an empty list and invalid indexes throw std::out_of_range.
+// Operations on an empty list and invalid indexes throw an error.
 //
 // Complexity:
 //   pushFront / pushBack / popFront / popBack / front / back ... O(1)
@@ -19,8 +19,9 @@
 //   contains / removeFirst ...................................... O(n)
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
+
+using namespace std;
 
 template <typename T>
 class DoublyLinkedList
@@ -105,16 +106,8 @@ public:
     DoublyLinkedList(const DoublyLinkedList& other)
         : head_(nullptr), tail_(nullptr), size_(0)
     {
-        try
-        {
-            for (const Node* node = other.head_; node != nullptr; node = node->next)
-                pushBack(node->data);
-        }
-        catch (...)
-        {
-            clear();
-            throw;
-        }
+        for (const Node* node = other.head_; node != nullptr; node = node->next)
+            pushBack(node->data);
     }
 
     DoublyLinkedList& operator=(const DoublyLinkedList& other)
@@ -159,10 +152,10 @@ public:
     }
 
     // Inserts value so that it ends up at position index (0 = front, size() = back).
-    void insertAt(std::size_t index, const T& value)
+    void insertAt(size_t index, const T& value)
     {
         if (index > size_)
-            throw std::out_of_range(indexMessage("insertAt", index, size_ + 1));
+            throw "DoublyLinkedList: index out of range";
 
         if (index == 0)
         {
@@ -187,20 +180,20 @@ public:
 
     void popFront()
     {
-        checkNotEmpty("popFront");
+        checkNotEmpty();
         unlink(head_);
     }
 
     void popBack()
     {
-        checkNotEmpty("popBack");
+        checkNotEmpty();
         unlink(tail_);
     }
 
-    void removeAt(std::size_t index)
+    void removeAt(size_t index)
     {
         if (index >= size_)
-            throw std::out_of_range(indexMessage("removeAt", index, size_));
+            throw "DoublyLinkedList: index out of range";
         unlink(nodeAt(index));
     }
 
@@ -236,39 +229,39 @@ public:
 
     T& front()
     {
-        checkNotEmpty("front");
+        checkNotEmpty();
         return head_->data;
     }
 
     const T& front() const
     {
-        checkNotEmpty("front");
+        checkNotEmpty();
         return head_->data;
     }
 
     T& back()
     {
-        checkNotEmpty("back");
+        checkNotEmpty();
         return tail_->data;
     }
 
     const T& back() const
     {
-        checkNotEmpty("back");
+        checkNotEmpty();
         return tail_->data;
     }
 
-    T& at(std::size_t index)
+    T& at(size_t index)
     {
         if (index >= size_)
-            throw std::out_of_range(indexMessage("at", index, size_));
+            throw "DoublyLinkedList: index out of range";
         return nodeAt(index)->data;
     }
 
-    const T& at(std::size_t index) const
+    const T& at(size_t index) const
     {
         if (index >= size_)
-            throw std::out_of_range(indexMessage("at", index, size_));
+            throw "DoublyLinkedList: index out of range";
         return nodeAt(index)->data;
     }
 
@@ -284,7 +277,7 @@ public:
 
     // ----- queries -----
 
-    std::size_t size() const { return size_; }
+    size_t size() const { return size_; }
     bool empty() const { return size_ == 0; }
 
     // ----- iteration -----
@@ -297,21 +290,21 @@ public:
 private:
     Node* head_;
     Node* tail_;
-    std::size_t size_;
+    size_t size_;
 
     // Walks from whichever end is closer. Caller guarantees index < size_.
-    Node* nodeAt(std::size_t index) const
+    Node* nodeAt(size_t index) const
     {
         if (index < size_ / 2)
         {
             Node* node = head_;
-            for (std::size_t i = 0; i < index; ++i)
+            for (size_t i = 0; i < index; ++i)
                 node = node->next;
             return node;
         }
 
         Node* node = tail_;
-        for (std::size_t i = size_ - 1; i > index; --i)
+        for (size_t i = size_ - 1; i > index; --i)
             node = node->prev;
         return node;
     }
@@ -333,17 +326,10 @@ private:
         --size_;
     }
 
-    void checkNotEmpty(const char* operation) const
+    void checkNotEmpty() const
     {
         if (size_ == 0)
-            throw std::out_of_range(std::string("DoublyLinkedList::") + operation + " on an empty list");
-    }
-
-    static std::string indexMessage(const char* operation, std::size_t index, std::size_t limit)
-    {
-        return std::string("DoublyLinkedList::") + operation + ": index " + std::to_string(index) +
-               " is out of range (valid: 0 to " +
-               (limit == 0 ? std::string("none") : std::to_string(limit - 1)) + ")";
+            throw "DoublyLinkedList: the list is empty";
     }
 };
 

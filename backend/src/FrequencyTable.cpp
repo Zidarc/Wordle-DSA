@@ -1,6 +1,7 @@
 #include "FrequencyTable.h"
 
-#include <stdexcept>
+using namespace std;
+
 
 FrequencyTable::FrequencyTable()
     : counts_(nullptr), wordCount_(0)
@@ -74,9 +75,9 @@ int FrequencyTable::letterIndex(char letter)
     return -1;
 }
 
-void FrequencyTable::add(const std::string& word)
+void FrequencyTable::add(const string& word)
 {
-    if (static_cast<int>(word.size()) != kPositions)
+    if ((int)(word.size()) != kPositions)
         return;
     int idx[kPositions];
     for (int p = 0; p < kPositions; ++p)
@@ -99,17 +100,17 @@ void FrequencyTable::add(const std::string& word)
     ++wordCount_;
 }
 
-void FrequencyTable::build(const SafeArray<std::string>& words)
+void FrequencyTable::build(const SafeArray<string>& words)
 {
     clear();
-    for (const std::string& w : words)
+    for (const string& w : words)
         add(w);
 }
 
-void FrequencyTable::build(const SinglyLinkedList<std::string>& words)
+void FrequencyTable::build(const SinglyLinkedList<string>& words)
 {
     clear();
-    for (const std::string& w : words)
+    for (const string& w : words)
         add(w);
 }
 
@@ -117,7 +118,7 @@ int FrequencyTable::countAt(int position, char letter) const
 {
     int l = letterIndex(letter);
     if (position < 0 || position >= kPositions || l < 0)
-        throw std::out_of_range("FrequencyTable::countAt: position or letter out of range");
+        throw "FrequencyTable::countAt: position or letter out of range";
     return counts_[position][l];
 }
 
@@ -125,14 +126,14 @@ int FrequencyTable::wordsContaining(char letter) const
 {
     int l = letterIndex(letter);
     if (l < 0)
-        throw std::out_of_range("FrequencyTable::wordsContaining: not a letter");
+        throw "FrequencyTable::wordsContaining: not a letter";
     return totals_[l];
 }
 
 // GUIDE 1.11 / 2.6: 5 x 26 table lookups, repeated letters count once
-long long FrequencyTable::score(const std::string& word) const
+long long FrequencyTable::score(const string& word) const
 {
-    if (static_cast<int>(word.size()) != kPositions)
+    if ((int)(word.size()) != kPositions)
         return 0;
     long long total = 0;
     bool seen[kLetters] = {false};
